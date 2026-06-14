@@ -260,12 +260,12 @@
       const groups = Object.values(grouped);
 
       groups.sort(function(a, b) {
-        if (b.date !== a.date) {
-          return b.date.localeCompare(a.date);
-        }
+  if (a.date !== b.date) {
+    return a.date.localeCompare(b.date);
+  }
 
-        return programOrder(a.program) - programOrder(b.program);
-      });
+  return programOrder(a.program) - programOrder(b.program);
+});
 
       window.reservationGroups = groups;
 
