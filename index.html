@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>しゅわっとみーる 管理画面</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: "Times New Roman", serif;
+      text-align: center;
+      padding: 32px 16px 40px;
+    }
+
+    .wrap {
+      width: min(92vw, 430px);
+      margin: 0 auto;
+    }
+
+    .box {
+      background: #0f0f0f;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 22px;
+      padding: 30px 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    .title {
+      font-size: 30px;
+      letter-spacing: .12em;
+      margin: 0 0 10px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      opacity: .72;
+      margin: 0 0 28px;
+      line-height: 1.8;
+    }
+
+    .menu {
+      display: grid;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .menu button,
+    .back-button {
+      width: 100%;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 999px;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-family: "Times New Roman", serif;
+      cursor: pointer;
+    }
+
+    .back-button {
+      background: transparent;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.18);
+      margin-bottom: 18px;
+    }
+
+    .panel {
+      display: none;
+      text-align: left;
+      margin-top: 26px;
+      padding-top: 22px;
+      border-top: 1px solid rgba(255,255,255,.12);
+      font-size: 14px;
+      line-height: 1.9;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .panel h2 {
+      font-size: 26px;
+      font-weight: normal;
+      margin: 0 0 26px;
+      letter-spacing: .12em;
+      text-align: center;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .summary-date {
+      font-size: 22px;
+      letter-spacing: .08em;
+      text-align: center;
+      margin: 34px 0 12px;
+      opacity: .95;
+    }
+
+    .summary-card,
+    .reservation-card {
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 18px;
+      padding: 18px 16px;
+      background: rgba(255,255,255,.03);
+      font-size: 15px;
+      line-height: 1.9;
+    }
+
+    .summary-card {
+      cursor: pointer;
+    }
+
+    .summary-card:active {
+      transform: scale(.99);
+    }
+
+    .service-name,
+    .reservation-card .name {
+      font-size: 20px;
+      margin-bottom: 10px;
+      letter-spacing: .04em;
+    }
+
+    .detail-header {
+      text-align: center;
+      margin-bottom: 18px;
+      line-height: 2;
+      opacity: .9;
+    }
+
+    .small {
+      opacity: .72;
+      font-size: 13px;
+    }
+
+    .status {
+      white-space: pre-line;
+      text-align: center;
+      opacity: .86;
+      padding: 20px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="box">
+      <h1 class="title">しゅわっとみーる</h1>
+      <p class="subtitle">参加者管理 / 日程別確認</p>
+
+      <div class="menu">
+        <button onclick="loadReservations()">予約管理</button>
+      </div>
+
+      <div id="reservation" class="panel">
+        <h2>Reservation</h2>
+        <div id="reservationList" class="status">読み込み前です。</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxoUCShYsMc8J0cPEwIU0JPrCIKgoT-zHYxWZ_w6T8tqchdRnemhDr1CEexbVa-aDMRDA/exec";
+
+    let allReservations = [];
+    let lastScrollY = 0;
+
+    function showPanel(id) {
+      const panels = document.querySelectorAll(".panel");
+
+      panels.forEach(function(panel) {
+        panel.classList.remove("active");
+      });
+
+      const target = document.getElementById(id);
+
+      if (target) {
+        target.classList.add("active");
+      }
+    }
+
+    async function loadReservations() {
+      showPanel("reservation");
+
+      const list = document.getElementById("reservationList");
+      list.className = "status";
+      list.textContent = "参加者履歴を読み込み中...";
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: new URLSearchParams({
+            action: "getReservations"
+          })
+        });
+
+        const data = await res.json();
+
+        if (!data.ok) {
+          list.textContent =
+            "参加者履歴を取得できませんでした。\n" +
+            (data.message || "");
+          return;
+        }
+
+        allReservations = data.reservations || [];
+
+        if (allReservations.length === 0) {
+          list.textContent = "現在、参加者履歴はありません。";
+          return;
+        }
+
+        renderSummary(allReservations);
+
+      } catch (err) {
+        list.textContent =
+          "参加者履歴の取得中にエラーが発生しました。\n" +
+          err.message;
+      }
+    }
+
+    function renderSummary(reservations) {
+      const list = document.getElementById("reservationList");
+      list.className = "";
+
+      const grouped = {};
+
+      reservations.forEach(function(r) {
+        const date = r.date || "日程未設定";
+        const program = r.program || "参加部未設定";
+        const key = date + "___" + program;
+
+        if (!grouped[key]) {
+          grouped[key] = {
+            date: date,
+            program: program,
+            reservations: [],
+            totalPeople: 0,
+            noteCount: 0,
+            allergyCount: 0,
+            snsNgCount: 0
+          };
+        }
+
+        grouped[key].reservations.push(r);
+        grouped[key].totalPeople += Number(r.people || 1);
+
+        if (hasText(r.note)) grouped[key].noteCount += 1;
+        if (hasText(r.allergy)) grouped[key].allergyCount += 1;
+        if (r.snsNg) grouped[key].snsNgCount += 1;
+      });
+
+      const groups = Object.values(grouped);
+
+      groups.sort(function(a, b) {
+        if (b.date !== a.date) {
+          return b.date.localeCompare(a.date);
+        }
+
+        return programOrder(a.program) - programOrder(b.program);
+      });
+
+      window.reservationGroups = groups;
+
+      let html = `<div class="summary-list">`;
+      let currentDate = "";
+
+      groups.forEach(function(group, index) {
+        if (group.date !== currentDate) {
+          currentDate = group.date;
+          html += `<div class="summary-date">${escapeHtml(currentDate)}</div>`;
+        }
+
+        html += `
+          <div class="summary-card" onclick="renderDetail(${index})">
+            <div class="service-name">${escapeHtml(group.program)}</div>
+            <div>人数合計：${group.totalPeople}名</div>
+            <div>備考あり：${group.noteCount}件</div>
+            <div>アレルギーあり：${group.allergyCount}件</div>
+            <div>SNS掲載NG：${group.snsNgCount}件</div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      list.innerHTML = html;
+    }
+
+    function renderDetail(index) {
+      lastScrollY = window.scrollY || 0;
+
+      const list = document.getElementById("reservationList");
+      const group = window.reservationGroups[index];
+
+      if (!group) {
+        list.className = "status";
+        list.textContent = "詳細を表示できませんでした。";
+        return;
+      }
+
+      let html = `
+        <button class="back-button" onclick="backToSummary()">一覧に戻る</button>
+
+        <div class="detail-header">
+          <div>${escapeHtml(group.date)}</div>
+          <div>${escapeHtml(group.program)}</div>
+          <div>人数合計：${group.totalPeople}名</div>
+        </div>
+
+        <div class="summary-list">
+      `;
+
+      group.reservations.forEach(function(r) {
+        html += `
+          <div class="reservation-card">
+            <div class="name">${escapeHtml(r.name || "")} 様</div>
+            <div>参加部：${escapeHtml(r.program || "")}</div>
+            <div>名前（カナ）：${escapeHtml(r.kana || "未設定")}</div>
+            <div>人数：${escapeHtml(String(r.people || 1))}名</div>
+            <div>手話レベル：${escapeHtml(r.signLevel || "未設定")}</div>
+            <div>アレルギー：${escapeHtml(r.allergy || "なし")}</div>
+            <div>SNS掲載：${r.snsNg ? "NG" : "OK"}</div>
+            <div>備考：${escapeHtml(r.note || "なし")}</div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      list.innerHTML = html;
+
+      window.scrollTo(0, 0);
+    }
+
+    function backToSummary() {
+      renderSummary(allReservations);
+
+      setTimeout(function() {
+        window.scrollTo(0, lastScrollY);
+      }, 50);
+    }
+
+    function programOrder(program) {
+      if (program === "第1部") return 1;
+      if (program === "第2部") return 2;
+      if (program === "特別会") return 3;
+      return 99;
+    }
+
+    function hasText(value) {
+      if (value === null || value === undefined) return false;
+
+      const text = String(value)
+        .replace(/\s/g, "")
+        .trim();
+
+      if (!text) return false;
+      if (text === "なし") return false;
+      if (text === "無し") return false;
+      if (text === "-") return false;
+      if (text === "特になし") return false;
+
+      return true;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+</html>
