@@ -210,15 +210,15 @@
           return;
         }
 
-        allReservations = data.reservations || [];
+        allReservations = filterFutureReservations(data.reservations || []);
 
-        if (allReservations.length === 0) {
-          list.textContent = "現在、参加者履歴はありません。";
-          return;
-        }
+if (allReservations.length === 0) {
+  list.textContent = "今日以降の参加者履歴はありません。";
+  return;
+}
 
-        renderSummary(allReservations);
-
+renderSummary(allReservations);
+        
       } catch (err) {
         list.textContent =
           "参加者履歴の取得中にエラーが発生しました。\n" +
@@ -377,6 +377,56 @@
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
     }
+
+    function filterFutureReservations(reservations) {
+  const today = getTodayDateOnly();
+
+  return reservations.filter(function(r) {
+    const target = parseDateOnly(r.date);
+
+    if (!target) {
+      return false;
+    }
+
+    return target.getTime() >= today.getTime();
+  });
+}
+
+function getTodayDateOnly() {
+  const now = new Date();
+
+  return new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+}
+
+function parseDateOnly(value) {
+  if (!value) {
+    return null;
+  }
+
+  const str = String(value)
+    .trim()
+    .replaceAll("-", "/");
+
+  const parts = str.split("/");
+
+  if (parts.length < 3) {
+    return null;
+  }
+
+  const year = Number(parts[0]);
+  const month = Number(parts[1]);
+  const day = Number(parts[2]);
+
+  if (!year || !month || !day) {
+    return null;
+  }
+
+  return new Date(year, month - 1, day);
+}
   </script>
 </body>
 </html>
