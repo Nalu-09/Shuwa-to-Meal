@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>しゅわっとみーる 管理画面</title>
 
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -58,6 +60,11 @@
       font-size: 15px;
       font-family: "Times New Roman", serif;
       cursor: pointer;
+    }
+
+    .menu button:disabled {
+      opacity: .42;
+      cursor: not-allowed;
     }
 
     .back-button {
@@ -155,8 +162,10 @@
       <h1 class="title">しゅわっとみーる</h1>
       <p class="subtitle">参加者管理 / 日程別確認</p>
 
+      <div id="pageStatus" class="status">LIFF初期化中...</div>
+
       <div class="menu">
-        <button onclick="loadReservations()">予約管理</button>
+        <button id="reservationButton" onclick="loadReservations()" disabled>予約管理</button>
       </div>
 
       <div id="reservation" class="panel">
@@ -167,10 +176,43 @@
   </div>
 
   <script>
+    const LIFF_ID = "2007730715-DyW80WjD";
     const API_URL = "https://script.google.com/macros/s/AKfycbxoUCShYsMc8J0cPEwIU0JPrCIKgoT-zHYxWZ_w6T8tqchdRnemhDr1CEexbVa-aDMRDA/exec";
 
+    let currentProfile = null;
     let allReservations = [];
     let lastScrollY = 0;
+
+    async function initLiff() {
+      const pageStatus = document.getElementById("pageStatus");
+      const reservationButton = document.getElementById("reservationButton");
+
+      try {
+        pageStatus.textContent = "LIFF初期化中...";
+
+        await liff.init({
+          liffId: LIFF_ID
+        });
+
+        if (!liff.isLoggedIn()) {
+          pageStatus.textContent = "LINEログインへ移動します...";
+          liff.login();
+          return;
+        }
+
+        currentProfile = await liff.getProfile();
+
+        pageStatus.textContent = "";
+        reservationButton.disabled = false;
+
+      } catch (err) {
+        pageStatus.textContent =
+          "LIFFの初期化に失敗しました。\n" +
+          err.message;
+
+        reservationButton.disabled = true;
+      }
+    }
 
     function showPanel(id) {
       const panels = document.querySelectorAll(".panel");
@@ -193,18 +235,32 @@
       list.className = "status";
       list.textContent = "参加者履歴を読み込み中...";
 
+      if (!currentProfile || !currentProfile.userId) {
+        list.textContent =
+          "LINEユーザー情報を取得できていません。\n" +
+          "ページを開き直してください。";
+        return;
+      }
+
       try {
-     const res = await fetch(API_URL, {
-  method: "POST",
-  body: new URLSearchParams({
-    action: "getReservations",
-    adminUserId: currentProfile.userId
-  })
-});
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: new URLSearchParams({
+            action: "getReservations",
+            adminUserId: currentProfile.userId
+          })
+        });
 
         const data = await res.json();
 
         if (!data.ok) {
+          if (data.message === "admin_only") {
+            list.textContent =
+              "このページは運営のみ閲覧できます。\n" +
+              "閲覧権限がありません。";
+            return;
+          }
+
           list.textContent =
             "参加者履歴を取得できませんでした。\n" +
             (data.message || "");
@@ -213,13 +269,13 @@
 
         allReservations = filterFutureReservations(data.reservations || []);
 
-if (allReservations.length === 0) {
-  list.textContent = "今日以降の参加者履歴はありません。";
-  return;
-}
+        if (allReservations.length === 0) {
+          list.textContent = "今日以降の参加者履歴はありません。";
+          return;
+        }
 
-renderSummary(allReservations);
-        
+        renderSummary(allReservations);
+
       } catch (err) {
         list.textContent =
           "参加者履歴の取得中にエラーが発生しました。\n" +
@@ -253,20 +309,28 @@ renderSummary(allReservations);
         grouped[key].reservations.push(r);
         grouped[key].totalPeople += Number(r.people || 1);
 
-        if (hasText(r.note)) grouped[key].noteCount += 1;
-        if (hasText(r.allergy)) grouped[key].allergyCount += 1;
-        if (r.snsNg) grouped[key].snsNgCount += 1;
+        if (hasText(r.note)) {
+          grouped[key].noteCount += 1;
+        }
+
+        if (hasText(r.allergy)) {
+          grouped[key].allergyCount += 1;
+        }
+
+        if (r.snsNg) {
+          grouped[key].snsNgCount += 1;
+        }
       });
 
       const groups = Object.values(grouped);
 
       groups.sort(function(a, b) {
-  if (a.date !== b.date) {
-    return a.date.localeCompare(b.date);
-  }
+        if (a.date !== b.date) {
+          return a.date.localeCompare(b.date);
+        }
 
-  return programOrder(a.program) - programOrder(b.program);
-});
+        return programOrder(a.program) - programOrder(b.program);
+      });
 
       window.reservationGroups = groups;
 
@@ -355,7 +419,9 @@ renderSummary(allReservations);
     }
 
     function hasText(value) {
-      if (value === null || value === undefined) return false;
+      if (value === null || value === undefined) {
+        return false;
+      }
 
       const text = String(value)
         .replace(/\s/g, "")
@@ -380,54 +446,56 @@ renderSummary(allReservations);
     }
 
     function filterFutureReservations(reservations) {
-  const today = getTodayDateOnly();
+      const today = getTodayDateOnly();
 
-  return reservations.filter(function(r) {
-    const target = parseDateOnly(r.date);
+      return reservations.filter(function(r) {
+        const target = parseDateOnly(r.date);
 
-    if (!target) {
-      return false;
+        if (!target) {
+          return false;
+        }
+
+        return target.getTime() >= today.getTime();
+      });
     }
 
-    return target.getTime() >= today.getTime();
-  });
-}
+    function getTodayDateOnly() {
+      const now = new Date();
 
-function getTodayDateOnly() {
-  const now = new Date();
+      return new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+      );
+    }
 
-  return new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  );
-}
+    function parseDateOnly(value) {
+      if (!value) {
+        return null;
+      }
 
-function parseDateOnly(value) {
-  if (!value) {
-    return null;
-  }
+      const str = String(value)
+        .trim()
+        .replaceAll("-", "/");
 
-  const str = String(value)
-    .trim()
-    .replaceAll("-", "/");
+      const parts = str.split("/");
 
-  const parts = str.split("/");
+      if (parts.length < 3) {
+        return null;
+      }
 
-  if (parts.length < 3) {
-    return null;
-  }
+      const year = Number(parts[0]);
+      const month = Number(parts[1]);
+      const day = Number(parts[2]);
 
-  const year = Number(parts[0]);
-  const month = Number(parts[1]);
-  const day = Number(parts[2]);
+      if (!year || !month || !day) {
+        return null;
+      }
 
-  if (!year || !month || !day) {
-    return null;
-  }
+      return new Date(year, month - 1, day);
+    }
 
-  return new Date(year, month - 1, day);
-}
+    initLiff();
   </script>
 </body>
 </html>
