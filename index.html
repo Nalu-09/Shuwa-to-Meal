@@ -647,8 +647,8 @@
     allReservations.forEach(
       function(item) {
         if (
-          Number(item.sheetRow) ===
-          Number(reservation.sheetRow)
+          Number(item.sourceRow) ===
+Number(reservation.sourceRow)
         ) {
           item.checkedIn = true;
         }
@@ -658,8 +658,8 @@
     group.reservations.forEach(
       function(item) {
         if (
-          Number(item.sheetRow) ===
-          Number(reservation.sheetRow)
+         Number(item.sourceRow) ===
+Number(reservation.sourceRow)
         ) {
           item.checkedIn = true;
         }
