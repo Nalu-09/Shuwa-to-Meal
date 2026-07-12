@@ -569,7 +569,7 @@
       }
       html += renderReceiptArea(
   r,
-  index,
+  index,Detail(
   reservationIndex
 );
 
@@ -854,8 +854,8 @@ Number(reservation.sourceRow)
       "参加済みに変更しました。"
     );
 
-    renderDetail(groupIndex, {
-  keepScroll: true
+    renderDetail(groupIndex);
+scrollToReservationCard(groupIndex, reservationIndex);
 });
 
   } catch (err) {
@@ -1004,8 +1004,8 @@ async function issueReceipt(
 
     alert("領収書を発行しました。");
 
-    renderDetail(groupIndex, {
-  keepScroll: true
+    renderDetail(groupIndex);
+scrollToReservationCard(groupIndex, reservationIndex);
 });
 
   } catch (err) {
