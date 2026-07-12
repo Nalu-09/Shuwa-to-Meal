@@ -501,7 +501,10 @@
   group.reservations.forEach(
     function(r, reservationIndex) {
       html += `
-        <div class="reservation-card">
+  <div
+    class="reservation-card"
+    id="reservation-card-${index}-${reservationIndex}"
+  >
           <div class="name">
             ${escapeHtml(r.name || "")} 様
           </div>
@@ -569,7 +572,7 @@
       }
       html += renderReceiptArea(
   r,
-  index,Detail(
+  index,
   reservationIndex
 );
 
@@ -589,6 +592,23 @@
   window.scrollTo(0, 0);
 }
 }
+    function scrollToReservationCard(groupIndex, reservationIndex) {
+  setTimeout(function() {
+    const card = document.getElementById(
+      "reservation-card-" + groupIndex + "-" + reservationIndex
+    );
+
+    if (!card) {
+      return;
+    }
+
+    card.scrollIntoView({
+      behavior: "auto",
+      block: "center"
+    });
+  }, 100);
+}
+    
     function renderReceiptArea(
   reservation,
   groupIndex,
@@ -856,7 +876,6 @@ Number(reservation.sourceRow)
 
     renderDetail(groupIndex);
 scrollToReservationCard(groupIndex, reservationIndex);
-});
 
   } catch (err) {
     if (resultArea) {
@@ -1006,7 +1025,6 @@ async function issueReceipt(
 
     renderDetail(groupIndex);
 scrollToReservationCard(groupIndex, reservationIndex);
-});
 
   } catch (err) {
     if (resultArea) {
