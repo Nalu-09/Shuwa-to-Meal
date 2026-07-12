@@ -188,6 +188,68 @@
   text-align:center;
   opacity:.75;
 }
+    .receipt-area {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+
+.receipt-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  font-family: "Times New Roman", serif;
+  cursor: pointer;
+}
+
+.receipt-button--primary {
+  background: #fff;
+  color: #000;
+  border: none;
+}
+
+.receipt-button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.receipt-info {
+  margin-top: 10px;
+  font-size: 12px;
+  text-align: center;
+  opacity: .78;
+  line-height: 1.7;
+}
+
+.qr-box {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.04);
+  text-align: center;
+}
+
+.qr-box img {
+  width: 180px;
+  height: 180px;
+  background: #fff;
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.qr-box a {
+  display: block;
+  margin-top: 12px;
+  color: #fff;
+  font-size: 13px;
+  text-decoration: underline;
+}
+    
   </style>
 </head>
 
@@ -497,6 +559,11 @@
           ></div>
         `;
       }
+      html += renderReceiptArea(
+  r,
+  index,
+  reservationIndex
+);
 
       html += `</div>`;
     }
@@ -508,6 +575,109 @@
 
   window.scrollTo(0, 0);
 }
+    function renderReceiptArea(
+  reservation,
+  groupIndex,
+  reservationIndex
+) {
+  const receiptNeed =
+    String(reservation.receiptNeed || "").trim();
+
+  const receiptIssued =
+    reservation.receiptIssued === true ||
+    !!reservation.receiptUrl;
+
+  const receiptNo =
+    reservation.receiptNo || "";
+
+  const receiptUrl =
+    reservation.receiptUrl || "";
+
+  /*
+   * 領収書不要の場合は何も出さない
+   */
+  if (receiptNeed !== "必要") {
+    return "";
+  }
+
+  let html = `
+    <div class="receipt-area">
+      <div class="receipt-info">
+        領収書：必要
+      </div>
+  `;
+
+  /*
+   * 発行済みの場合
+   */
+  if (receiptIssued && receiptUrl) {
+    html += `
+      <div class="receipt-info">
+        発行済み<br>
+        ${escapeHtml(receiptNo)}
+      </div>
+
+      <button
+        class="receipt-button"
+        onclick="openReceiptPdf(
+          '${escapeJs(receiptUrl)}'
+        )"
+      >
+        領収書PDFを開く
+      </button>
+
+      <button
+        class="receipt-button"
+        onclick="showReceiptQr(
+          '${escapeJs(receiptUrl)}',
+          ${groupIndex},
+          ${reservationIndex}
+        )"
+      >
+        QRコードを表示
+      </button>
+
+      <div
+        id="receipt-qr-${groupIndex}-${reservationIndex}"
+      ></div>
+    `;
+  } else {
+    /*
+     * 未発行の場合
+     * 参加済み後に発行する運用
+     */
+    if (reservation.checkedIn) {
+      html += `
+        <button
+          id="receipt-button-${groupIndex}-${reservationIndex}"
+          class="receipt-button receipt-button--primary"
+          onclick="issueReceipt(
+            ${groupIndex},
+            ${reservationIndex}
+          )"
+        >
+          領収書を発行する
+        </button>
+
+        <div
+          id="receipt-result-${groupIndex}-${reservationIndex}"
+          class="receipt-info"
+        ></div>
+      `;
+    } else {
+      html += `
+        <div class="receipt-info">
+          参加済みにした後、領収書を発行できます。
+        </div>
+      `;
+    }
+  }
+
+  html += `</div>`;
+
+  return html;
+}
+    
     async function updateCheckin(
   groupIndex,
   reservationIndex
@@ -690,7 +860,154 @@ Number(reservation.sourceRow)
     );
   }
 }
+async function issueReceipt(
+  groupIndex,
+  reservationIndex
+) {
+  const group =
+    window.reservationGroups[groupIndex];
 
+  if (!group) {
+    alert("参加者情報を取得できませんでした。");
+    return;
+  }
+
+  const reservation =
+    group.reservations[reservationIndex];
+
+  if (!reservation) {
+    alert("参加者情報を取得できませんでした。");
+    return;
+  }
+
+  if (!reservation.checkedIn) {
+    alert("先に参加済みにしてください。");
+    return;
+  }
+
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+    alert("運営者情報を取得できませんでした。");
+    return;
+  }
+
+  const confirmed =
+    window.confirm(
+      reservation.originalName +
+      " 様の領収書を発行しますか？"
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const button =
+    document.getElementById(
+      "receipt-button-" +
+      groupIndex +
+      "-" +
+      reservationIndex
+    );
+
+  const resultArea =
+    document.getElementById(
+      "receipt-result-" +
+      groupIndex +
+      "-" +
+      reservationIndex
+    );
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "発行中...";
+  }
+
+  if (resultArea) {
+    resultArea.textContent = "";
+  }
+
+  try {
+    const res =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+          body:
+            new URLSearchParams({
+              action: "issueReceipt",
+              adminUserId: currentProfile.userId,
+              sourceRow: String(reservation.sourceRow || "")
+            })
+        }
+      );
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      if (resultArea) {
+        resultArea.textContent =
+          "発行できませんでした：" +
+          (data.message || "");
+      }
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = "領収書を発行する";
+      }
+
+      return;
+    }
+
+    /*
+     * 同じsourceRowの表示をすべて更新
+     * 両方参加などに対応
+     */
+    allReservations.forEach(function(item) {
+      if (
+        Number(item.sourceRow) ===
+        Number(reservation.sourceRow)
+      ) {
+        item.receiptIssued = true;
+        item.receiptNo = data.receiptNo || "";
+        item.receiptUrl = data.pdfUrl || "";
+      }
+    });
+
+    group.reservations.forEach(function(item) {
+      if (
+        Number(item.sourceRow) ===
+        Number(reservation.sourceRow)
+      ) {
+        item.receiptIssued = true;
+        item.receiptNo = data.receiptNo || "";
+        item.receiptUrl = data.pdfUrl || "";
+      }
+    });
+
+    alert("領収書を発行しました。");
+
+    renderDetail(groupIndex);
+
+  } catch (err) {
+    if (resultArea) {
+      resultArea.textContent =
+        "発行中にエラーが発生しました。";
+    }
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "領収書を発行する";
+    }
+
+    alert(
+      "発行中にエラーが発生しました：" +
+      err.message
+    );
+  }
+}
+    
     function backToSummary() {
       renderSummary(allReservations);
 
@@ -732,6 +1049,15 @@ Number(reservation.sourceRow)
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
     }
+    
+    function escapeJs(str) {
+  return String(str || "")
+    .replaceAll("\\", "\\\\")
+    .replaceAll("'", "\\'")
+    .replaceAll('"', '\\"')
+    .replaceAll("\n", "\\n")
+    .replaceAll("\r", "");
+}
 
     function filterFutureReservations(reservations) {
       const today = getTodayDateOnly();
@@ -784,6 +1110,61 @@ Number(reservation.sourceRow)
     }
 
     initLiff();
+
+    function openReceiptPdf(url) {
+  if (!url) {
+    alert("PDF URLがありません。");
+    return;
+  }
+
+  window.open(url, "_blank");
+}
+
+function showReceiptQr(
+  url,
+  groupIndex,
+  reservationIndex
+) {
+  if (!url) {
+    alert("PDF URLがありません。");
+    return;
+  }
+
+  const area =
+    document.getElementById(
+      "receipt-qr-" +
+      groupIndex +
+      "-" +
+      reservationIndex
+    );
+
+  if (!area) {
+    return;
+  }
+
+  const qrUrl =
+    "https://quickchart.io/qr?size=180&text=" +
+    encodeURIComponent(url);
+
+  area.innerHTML = `
+    <div class="qr-box">
+      <img
+        src="${qrUrl}"
+        alt="領収書PDFのQRコード"
+      >
+      <a
+        href="${escapeHtml(url)}"
+        target="_blank"
+        rel="noopener"
+      >
+        PDFを開く
+      </a>
+      <div class="receipt-info">
+        参加者のスマートフォンで読み取ってください。
+      </div>
+    </div>
+  `;
+}
   </script>
 </body>
 </html>
