@@ -455,8 +455,16 @@
       list.innerHTML = html;
     }
 
-    function renderDetail(index) {
-  lastScrollY = window.scrollY || 0;
+    function renderDetail(index, options) {
+  const keepScroll =
+    options && options.keepScroll === true;
+
+  const restoreScrollY =
+    window.scrollY || 0;
+
+  if (!keepScroll) {
+    lastScrollY = window.scrollY || 0;
+  }
 
   const list =
     document.getElementById(
@@ -573,7 +581,13 @@
 
   list.innerHTML = html;
 
+  if (keepScroll) {
+  setTimeout(function() {
+    window.scrollTo(0, restoreScrollY);
+  }, 0);
+} else {
   window.scrollTo(0, 0);
+}
 }
     function renderReceiptArea(
   reservation,
@@ -840,7 +854,9 @@ Number(reservation.sourceRow)
       "参加済みに変更しました。"
     );
 
-    renderDetail(groupIndex);
+    renderDetail(groupIndex, {
+  keepScroll: true
+});
 
   } catch (err) {
     if (resultArea) {
@@ -988,7 +1004,9 @@ async function issueReceipt(
 
     alert("領収書を発行しました。");
 
-    renderDetail(groupIndex);
+    renderDetail(groupIndex, {
+  keepScroll: true
+});
 
   } catch (err) {
     if (resultArea) {
