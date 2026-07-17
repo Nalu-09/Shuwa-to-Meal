@@ -151,12 +151,19 @@
     }
 
     .companion-box {
-  margin-top: 22px;
-  padding: 16px 14px;
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 16px;
-  background: rgba(255,255,255,.03);
-}
+      margin-top: 22px;
+      padding: 16px 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 16px;
+      background: rgba(255,255,255,.03);
+    }
+
+    .companion-title {
+      font-size: 17px;
+      letter-spacing: .06em;
+      margin-bottom: 10px;
+      opacity: .95;
+    }
   </style>
 </head>
 
@@ -198,7 +205,6 @@
           <option value="4">4名</option>
           <option value="5">5名</option>
         </select>
-        <div id="companionArea" class="hidden"></div>
 
         <label>手話レベル</label>
         <select id="signLevel" required>
@@ -234,18 +240,20 @@
         <textarea id="dislikedFoods" placeholder="ない場合は空欄で構いません"></textarea>
 
         <label>SNS掲載について</label>
-        <select id="snsNg" required>
+        <select id="snsStatus" required>
           <option value="">選択してください</option>
-          <option value="false">掲載可能</option>
-          <option value="true">掲載NG</option>
+          <option value="掲載可能">掲載可能</option>
+          <option value="掲載NG">掲載NG</option>
         </select>
 
         <label>領収書発行</label>
         <select id="receiptNeed" required>
           <option value="">選択してください</option>
-          <option value="false">不要</option>
-          <option value="true">必要</option>
+          <option value="必要">必要</option>
+          <option value="不要">不要</option>
         </select>
+
+        <div id="companionArea" class="hidden"></div>
 
         <label>備考</label>
         <textarea id="note" placeholder="連絡事項があればご記入ください"></textarea>
@@ -283,16 +291,20 @@
     document
       .getElementById("people")
       .addEventListener("change", renderCompanionFields);
+
     document
       .getElementById("allergyStatus")
       .addEventListener("change", function() {
         const area = document.getElementById("allergyDetailArea");
+        const detail = document.getElementById("allergyDetail");
 
         if (this.value === "あり") {
           area.classList.remove("hidden");
+          detail.setAttribute("required", "required");
         } else {
           area.classList.add("hidden");
-          document.getElementById("allergyDetail").value = "";
+          detail.removeAttribute("required");
+          detail.value = "";
         }
       });
 
@@ -351,11 +363,10 @@
 
       reservationOptions.forEach(function(option) {
         const date = option.eventDate;
-        const label = date;
 
         eventDateEl.innerHTML +=
           '<option value="' + escapeHtml(date) + '">' +
-          escapeHtml(label) +
+          escapeHtml(date) +
           '</option>';
       });
     }
@@ -417,10 +428,6 @@
             ? "残り " + data.remaining + "名"
             : "満席";
 
-        const id =
-          "program_" +
-          item.value.replaceAll("第", "").replaceAll("部", "");
-
         programListEl.innerHTML += `
           <label class="program-option ${disabled ? "disabled" : ""}">
             <input
@@ -442,6 +449,171 @@
           </label>
         `;
       });
+    }
+
+    function renderCompanionFields() {
+      const people = Number(
+        document.getElementById("people").value || 1
+      );
+
+      const area = document.getElementById("companionArea");
+
+      if (!area) {
+        return;
+      }
+
+      if (people <= 1) {
+        area.classList.add("hidden");
+        area.innerHTML = "";
+        return;
+      }
+
+      area.classList.remove("hidden");
+
+      let html = "";
+
+      for (let i = 2; i <= people; i++) {
+        html += `
+          <div class="companion-box">
+            <div class="companion-title">
+              同行者${i}
+            </div>
+
+            <label>お名前</label>
+            <input
+              id="companionName${i}"
+              type="text"
+              required
+            >
+
+            <label>手話レベル</label>
+            <select
+              id="companionSignLevel${i}"
+              required
+            >
+              <option value="">選択してください</option>
+              <option value="未経験">未経験</option>
+              <option value="あいさつ程度">あいさつ程度</option>
+              <option value="日常会話程度">日常会話程度</option>
+              <option value="手話を主なコミュニケーションとしている">
+                手話を主なコミュニケーションとしている
+              </option>
+            </select>
+
+            <label>決済方法</label>
+            <select
+              id="companionPaymentMethod${i}"
+              required
+              onchange="toggleCompanionReceipt(${i})"
+            >
+              <option value="">選択してください</option>
+              <option value="PayPay">PayPay</option>
+              <option value="銀行振込">銀行振込</option>
+              <option value="代表者がまとめて決済">代表者がまとめて決済</option>
+            </select>
+
+            <div id="companionReceiptArea${i}">
+              <label>領収書発行</label>
+              <select id="companionReceiptNeed${i}">
+                <option value="">選択してください</option>
+                <option value="必要">必要</option>
+                <option value="不要">不要</option>
+                <option value="不明">不明</option>
+              </select>
+            </div>
+
+            <label>アレルギーの有無</label>
+            <select
+              id="companionAllergyStatus${i}"
+              required
+              onchange="toggleCompanionAllergyDetail(${i})"
+            >
+              <option value="">選択してください</option>
+              <option value="なし">なし</option>
+              <option value="あり">あり</option>
+            </select>
+
+            <div
+              id="companionAllergyDetailArea${i}"
+              class="hidden"
+            >
+              <label>アレルギー名</label>
+              <textarea
+                id="companionAllergyDetail${i}"
+              ></textarea>
+            </div>
+
+            <label>苦手食材</label>
+            <textarea
+              id="companionDislikedFoods${i}"
+              placeholder="ない場合は空欄で構いません"
+            ></textarea>
+
+            <label>SNS掲載について</label>
+            <select
+              id="companionSnsStatus${i}"
+              required
+            >
+              <option value="">選択してください</option>
+              <option value="掲載可能">掲載可能</option>
+              <option value="掲載NG">掲載NG</option>
+              <option value="不明">不明</option>
+            </select>
+          </div>
+        `;
+      }
+
+      area.innerHTML = html;
+    }
+
+    function toggleCompanionAllergyDetail(index) {
+      const status = document.getElementById(
+        "companionAllergyStatus" + index
+      ).value;
+
+      const area = document.getElementById(
+        "companionAllergyDetailArea" + index
+      );
+
+      const detail = document.getElementById(
+        "companionAllergyDetail" + index
+      );
+
+      if (status === "あり") {
+        area.classList.remove("hidden");
+        detail.setAttribute("required", "required");
+      } else {
+        area.classList.add("hidden");
+        detail.removeAttribute("required");
+        detail.value = "";
+      }
+    }
+
+    function toggleCompanionReceipt(index) {
+      const paymentMethod = document.getElementById(
+        "companionPaymentMethod" + index
+      ).value;
+
+      const area = document.getElementById(
+        "companionReceiptArea" + index
+      );
+
+      const receipt = document.getElementById(
+        "companionReceiptNeed" + index
+      );
+
+      if (paymentMethod === "代表者がまとめて決済") {
+        area.classList.add("hidden");
+        receipt.removeAttribute("required");
+        receipt.value = "不要";
+      } else {
+        area.classList.remove("hidden");
+        receipt.setAttribute("required", "required");
+
+        if (receipt.value === "不要") {
+          receipt.value = "";
+        }
+      }
     }
 
     async function submitReservation(e) {
@@ -481,10 +653,14 @@
         alert("アレルギー内容を入力してください。");
         return;
       }
-      
+
+      if (!validateCapacityForPeople(programInput.value)) {
+        return;
+      }
+
       if (!validateCompanions()) {
-  return;
-}
+        return;
+      }
 
       const confirmed =
         confirm("この内容で予約を送信しますか？");
@@ -513,9 +689,9 @@
           allergyStatus: allergyStatus,
           allergyDetail: allergyDetail,
           dislikedFoods: document.getElementById("dislikedFoods").value.trim(),
-          companionInfo: getCompanionInfoText(),
-          snsNg: document.getElementById("snsNg").value,
+          snsStatus: document.getElementById("snsStatus").value,
           receiptNeed: document.getElementById("receiptNeed").value,
+          companions: JSON.stringify(getCompanionsData()),
           note: document.getElementById("note").value.trim()
         });
 
@@ -556,187 +732,158 @@
       }
     }
 
-    function renderCompanionFields() {
-  const people = Number(
-    document.getElementById("people").value || 1
-  );
+    function validateCapacityForPeople(program) {
+      const people = Number(
+        document.getElementById("people").value || 1
+      );
 
-  const area = document.getElementById("companionArea");
+      if (!selectedEvent) {
+        return true;
+      }
 
-  if (!area) {
-    return;
-  }
+      let remaining = 999;
 
-  if (people <= 1) {
-    area.classList.add("hidden");
-    area.innerHTML = "";
-    return;
-  }
+      if (program === "第1部" && selectedEvent.first) {
+        remaining = Number(selectedEvent.first.remaining || 0);
+      }
 
-  area.classList.remove("hidden");
+      if (program === "第2部" && selectedEvent.second) {
+        remaining = Number(selectedEvent.second.remaining || 0);
+      }
 
-  let html = "";
+      if (program === "両方" && selectedEvent.both) {
+        remaining = Number(selectedEvent.both.remaining || 0);
+      }
 
-  for (let i = 2; i <= people; i++) {
-    html += `
-      <div class="companion-box">
-        <label>同行者${i} お名前</label>
-        <input
-          id="companionName${i}"
-          type="text"
-          required
-        >
+      if (people > remaining) {
+        alert(
+          "選択した参加部の残席数を超えています。\n" +
+          "残席：" + remaining + "名"
+        );
+        return false;
+      }
 
-        <label>同行者${i} アレルギーの有無</label>
-        <select
-          id="companionAllergyStatus${i}"
-          required
-          onchange="toggleCompanionAllergyDetail(${i})"
-        >
-          <option value="">選択してください</option>
-          <option value="なし">なし</option>
-          <option value="あり">あり</option>
-        </select>
-
-        <div
-          id="companionAllergyDetailArea${i}"
-          class="hidden"
-        >
-          <label>同行者${i} アレルギー名</label>
-          <textarea
-            id="companionAllergyDetail${i}"
-          ></textarea>
-        </div>
-
-        <label>同行者${i} 苦手食材</label>
-        <textarea
-          id="companionDislikedFoods${i}"
-          placeholder="ない場合は空欄で構いません"
-        ></textarea>
-      </div>
-    `;
-  }
-
-  area.innerHTML = html;
-}
-
-function toggleCompanionAllergyDetail(index) {
-  const status = document.getElementById(
-    "companionAllergyStatus" + index
-  ).value;
-
-  const area = document.getElementById(
-    "companionAllergyDetailArea" + index
-  );
-
-  const detail = document.getElementById(
-    "companionAllergyDetail" + index
-  );
-
-  if (status === "あり") {
-    area.classList.remove("hidden");
-    detail.setAttribute("required", "required");
-  } else {
-    area.classList.add("hidden");
-    detail.removeAttribute("required");
-    detail.value = "";
-  }
-}
-
-function validateCompanions() {
-  const people = Number(
-    document.getElementById("people").value || 1
-  );
-
-  if (people <= 1) {
-    return true;
-  }
-
-  for (let i = 2; i <= people; i++) {
-    const name = document
-      .getElementById("companionName" + i)
-      .value
-      .trim();
-
-    const allergyStatus = document
-      .getElementById("companionAllergyStatus" + i)
-      .value;
-
-    const allergyDetail = document
-      .getElementById("companionAllergyDetail" + i)
-      .value
-      .trim();
-
-    if (!name) {
-      alert("同行者" + i + "のお名前を入力してください。");
-      return false;
+      return true;
     }
 
-    if (!allergyStatus) {
-      alert("同行者" + i + "のアレルギーの有無を選択してください。");
-      return false;
+    function validateCompanions() {
+      const people = Number(
+        document.getElementById("people").value || 1
+      );
+
+      if (people <= 1) {
+        return true;
+      }
+
+      for (let i = 2; i <= people; i++) {
+        const name = document
+          .getElementById("companionName" + i)
+          .value
+          .trim();
+
+        const signLevel = document
+          .getElementById("companionSignLevel" + i)
+          .value;
+
+        const paymentMethod = document
+          .getElementById("companionPaymentMethod" + i)
+          .value;
+
+        const allergyStatus = document
+          .getElementById("companionAllergyStatus" + i)
+          .value;
+
+        const allergyDetail = document
+          .getElementById("companionAllergyDetail" + i)
+          .value
+          .trim();
+
+        const snsStatus = document
+          .getElementById("companionSnsStatus" + i)
+          .value;
+
+        const receiptNeed = document
+          .getElementById("companionReceiptNeed" + i)
+          .value;
+
+        if (!name) {
+          alert("同行者" + i + "のお名前を入力してください。");
+          return false;
+        }
+
+        if (!signLevel) {
+          alert("同行者" + i + "の手話レベルを選択してください。");
+          return false;
+        }
+
+        if (!paymentMethod) {
+          alert("同行者" + i + "の決済方法を選択してください。");
+          return false;
+        }
+
+        if (
+          paymentMethod !== "代表者がまとめて決済" &&
+          !receiptNeed
+        ) {
+          alert("同行者" + i + "の領収書発行を選択してください。");
+          return false;
+        }
+
+        if (!allergyStatus) {
+          alert("同行者" + i + "のアレルギーの有無を選択してください。");
+          return false;
+        }
+
+        if (allergyStatus === "あり" && !allergyDetail) {
+          alert("同行者" + i + "のアレルギー名を入力してください。");
+          return false;
+        }
+
+        if (!snsStatus) {
+          alert("同行者" + i + "のSNS掲載について選択してください。");
+          return false;
+        }
+      }
+
+      return true;
     }
 
-    if (allergyStatus === "あり" && !allergyDetail) {
-      alert("同行者" + i + "のアレルギー名を入力してください。");
-      return false;
+    function getCompanionsData() {
+      const people = Number(
+        document.getElementById("people").value || 1
+      );
+
+      if (people <= 1) {
+        return [];
+      }
+
+      const companions = [];
+
+      for (let i = 2; i <= people; i++) {
+        const paymentMethod = document
+          .getElementById("companionPaymentMethod" + i)
+          .value;
+
+        const receiptNeed =
+          paymentMethod === "代表者がまとめて決済"
+            ? "不要"
+            : document.getElementById("companionReceiptNeed" + i).value;
+
+        companions.push({
+          name: document.getElementById("companionName" + i).value.trim(),
+          signLevel: document.getElementById("companionSignLevel" + i).value,
+          paymentMethod: paymentMethod,
+          allergyStatus: document.getElementById("companionAllergyStatus" + i).value,
+          allergyDetail: document.getElementById("companionAllergyDetail" + i).value.trim(),
+          dislikedFoods: document.getElementById("companionDislikedFoods" + i).value.trim(),
+          snsStatus: document.getElementById("companionSnsStatus" + i).value,
+          receiptNeed: receiptNeed
+        });
+      }
+
+      return companions;
     }
-  }
 
-  return true;
-}
-
-function getCompanionInfoText() {
-  const people = Number(
-    document.getElementById("people").value || 1
-  );
-
-  if (people <= 1) {
-    return "";
-  }
-
-  const lines = [];
-
-  for (let i = 2; i <= people; i++) {
-    const name = document
-      .getElementById("companionName" + i)
-      .value
-      .trim();
-
-    const allergyStatus = document
-      .getElementById("companionAllergyStatus" + i)
-      .value;
-
-    const allergyDetail = document
-      .getElementById("companionAllergyDetail" + i)
-      .value
-      .trim();
-
-    const dislikedFoods = document
-      .getElementById("companionDislikedFoods" + i)
-      .value
-      .trim();
-
-    lines.push(
-      "同行者" + i + "：" + name +
-      " / アレルギー：" +
-      (
-        allergyStatus === "あり"
-          ? allergyDetail
-          : "なし"
-      ) +
-      " / 苦手食材：" +
-      (
-        dislikedFoods
-          ? dislikedFoods
-          : "なし"
-      )
-    );
-  }
-
-  return lines.join("\n");
-}
-    
     function handleSubmitError(message) {
       const messages = {
         event_date_required: "開催日を選択してください。",
@@ -753,7 +900,8 @@ function getCompanionInfoText() {
         allergy_detail_required: "アレルギー内容を入力してください。",
         event_not_found: "この開催は現在受付できません。",
         first_full: "第1部は満席です。",
-        second_full: "第2部は満席です。"
+        second_full: "第2部は満席です。",
+        companion_invalid: "同行者情報を確認してください。"
       };
 
       alert(
