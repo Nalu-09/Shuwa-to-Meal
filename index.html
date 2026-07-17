@@ -630,9 +630,12 @@
   /*
    * 領収書不要の場合は何も出さない
    */
-  if (receiptNeed !== "必要") {
-    return "";
-  }
+  if (
+  receiptNeed !== "必要" &&
+  receiptNeed !== "不明"
+) {
+  return "";
+}
 
   let html = `
     <div class="receipt-area">
