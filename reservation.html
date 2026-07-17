@@ -486,6 +486,13 @@
               required
             >
 
+            <label>お名前（カナ）</label>
+<input
+  id="companionKana${i}"
+  type="text"
+  required
+>
+
             <label>手話レベル</label>
             <select
               id="companionSignLevel${i}"
@@ -781,6 +788,11 @@
           .value
           .trim();
 
+        const kana = document
+  .getElementById("companionKana" + i)
+  .value
+  .trim();
+
         const signLevel = document
           .getElementById("companionSignLevel" + i)
           .value;
@@ -810,6 +822,11 @@
           alert("同行者" + i + "のお名前を入力してください。");
           return false;
         }
+
+        if (!kana) {
+  alert("同行者" + i + "のお名前（カナ）を入力してください。");
+  return false;
+}
 
         if (!signLevel) {
           alert("同行者" + i + "の手話レベルを選択してください。");
@@ -870,15 +887,16 @@
             : document.getElementById("companionReceiptNeed" + i).value;
 
         companions.push({
-          name: document.getElementById("companionName" + i).value.trim(),
-          signLevel: document.getElementById("companionSignLevel" + i).value,
-          paymentMethod: paymentMethod,
-          allergyStatus: document.getElementById("companionAllergyStatus" + i).value,
-          allergyDetail: document.getElementById("companionAllergyDetail" + i).value.trim(),
-          dislikedFoods: document.getElementById("companionDislikedFoods" + i).value.trim(),
-          snsStatus: document.getElementById("companionSnsStatus" + i).value,
-          receiptNeed: receiptNeed
-        });
+  name: document.getElementById("companionName" + i).value.trim(),
+  kana: document.getElementById("companionKana" + i).value.trim(),
+  signLevel: document.getElementById("companionSignLevel" + i).value,
+  paymentMethod: paymentMethod,
+  allergyStatus: document.getElementById("companionAllergyStatus" + i).value,
+  allergyDetail: document.getElementById("companionAllergyDetail" + i).value.trim(),
+  dislikedFoods: document.getElementById("companionDislikedFoods" + i).value.trim(),
+  snsStatus: document.getElementById("companionSnsStatus" + i).value,
+  receiptNeed: receiptNeed
+});
       }
 
       return companions;
