@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>しゅわっとみーる 予約フォーム</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: "Times New Roman", "Yu Mincho", serif;
+      padding: 32px 16px 48px;
+    }
+
+    .wrap {
+      width: min(92vw, 460px);
+      margin: 0 auto;
+    }
+
+    .box {
+      background: #0f0f0f;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 22px;
+      padding: 28px 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 30px;
+      letter-spacing: .12em;
+      font-weight: normal;
+      margin: 0 0 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 14px;
+      opacity: .75;
+      line-height: 1.8;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      margin: 22px 0 8px;
+      opacity: .9;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 12px;
+      background: #050505;
+      color: #fff;
+      padding: 13px 12px;
+      font-size: 16px;
+      font-family: inherit;
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    .program-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .program-option {
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(255,255,255,.03);
+      cursor: pointer;
+    }
+
+    .program-option.disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    .program-option input {
+      width: auto;
+      margin-right: 8px;
+    }
+
+    .program-title {
+      font-size: 17px;
+    }
+
+    .program-meta {
+      font-size: 13px;
+      opacity: .72;
+      margin-top: 6px;
+      line-height: 1.6;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .button {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      background: #fff;
+      color: #000;
+      padding: 15px 18px;
+      margin-top: 28px;
+      font-size: 16px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .status {
+      white-space: pre-line;
+      text-align: center;
+      line-height: 1.8;
+      opacity: .86;
+      margin: 18px 0;
+    }
+
+    .note {
+      font-size: 12px;
+      opacity: .68;
+      line-height: 1.8;
+      margin-top: 8px;
+    }
+
+    .complete {
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 18px;
+      padding: 20px 16px;
+      background: rgba(255,255,255,.04);
+      line-height: 1.9;
+      text-align: left;
+      margin-top: 22px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="box">
+      <h1>しゅわっとみーる</h1>
+      <div class="subtitle">
+        予約フォーム<br>
+        Shuwa to Meal
+      </div>
+
+      <div id="status" class="status">開催情報を読み込み中...</div>
+
+      <form id="reservationForm" class="hidden">
+        <label>開催日</label>
+        <select id="eventDate" required></select>
+
+        <label>参加部</label>
+        <div id="programList" class="program-list"></div>
+
+        <label>お名前</label>
+        <input id="name" type="text" autocomplete="name" required>
+
+        <label>お名前（カナ）</label>
+        <input id="kana" type="text" required>
+
+        <label>メールアドレス</label>
+        <input id="email" type="email" autocomplete="email" required>
+
+        <label>メールアドレス確認</label>
+        <input id="emailConfirm" type="email" autocomplete="email" required>
+
+        <label>参加人数</label>
+        <select id="people" required>
+          <option value="1">1名</option>
+          <option value="2">2名</option>
+          <option value="3">3名</option>
+          <option value="4">4名</option>
+          <option value="5">5名</option>
+        </select>
+
+        <label>手話レベル</label>
+        <select id="signLevel" required>
+          <option value="">選択してください</option>
+          <option value="未経験">未経験</option>
+          <option value="あいさつ程度">あいさつ程度</option>
+          <option value="日常会話程度">日常会話程度</option>
+          <option value="手話を主なコミュニケーションとしている">
+            手話を主なコミュニケーションとしている
+          </option>
+        </select>
+
+        <label>決済方法</label>
+        <select id="paymentMethod" required>
+          <option value="">選択してください</option>
+          <option value="PayPay">PayPay</option>
+          <option value="現金">現金</option>
+        </select>
+
+        <label>アレルギーの有無</label>
+        <select id="allergyStatus" required>
+          <option value="">選択してください</option>
+          <option value="なし">なし</option>
+          <option value="あり">あり</option>
+        </select>
+
+        <div id="allergyDetailArea" class="hidden">
+          <label>アレルギー内容</label>
+          <textarea id="allergyDetail"></textarea>
+        </div>
+
+        <label>苦手食材</label>
+        <textarea id="dislikedFoods" placeholder="ない場合は空欄で構いません"></textarea>
+
+        <label>SNS掲載について</label>
+        <select id="snsNg" required>
+          <option value="">選択してください</option>
+          <option value="false">掲載可能</option>
+          <option value="true">掲載NG</option>
+        </select>
+
+        <label>領収書発行</label>
+        <select id="receiptNeed" required>
+          <option value="">選択してください</option>
+          <option value="false">不要</option>
+          <option value="true">必要</option>
+        </select>
+
+        <label>備考</label>
+        <textarea id="note" placeholder="連絡事項があればご記入ください"></textarea>
+
+        <div class="note">
+          送信後、ご入力いただいたメールアドレス宛に受付完了メールをお送りします。
+        </div>
+
+        <button id="submitButton" class="button" type="submit">
+          予約する
+        </button>
+      </form>
+
+      <div id="completeArea"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL =
+      "https://script.google.com/macros/s/AKfycbxoUCShYsMc8J0cPEwIU0JPrCIKgoT-zHYxWZ_w6T8tqchdRnemhDr1CEexbVa-aDMRDA/exec";
+
+    const source =
+      new URLSearchParams(location.search).get("source") || "web";
+
+    let reservationOptions = [];
+    let selectedEvent = null;
+
+    const statusEl = document.getElementById("status");
+    const formEl = document.getElementById("reservationForm");
+    const eventDateEl = document.getElementById("eventDate");
+    const programListEl = document.getElementById("programList");
+    const completeAreaEl = document.getElementById("completeArea");
+    const submitButton = document.getElementById("submitButton");
+
+    document
+      .getElementById("allergyStatus")
+      .addEventListener("change", function() {
+        const area = document.getElementById("allergyDetailArea");
+
+        if (this.value === "あり") {
+          area.classList.remove("hidden");
+        } else {
+          area.classList.add("hidden");
+          document.getElementById("allergyDetail").value = "";
+        }
+      });
+
+    eventDateEl.addEventListener("change", function() {
+      renderProgramOptions(this.value);
+    });
+
+    formEl.addEventListener("submit", submitReservation);
+
+    loadReservationOptions();
+
+    async function loadReservationOptions() {
+      try {
+        statusEl.textContent = "開催情報を読み込み中...";
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: new URLSearchParams({
+            action: "getReservationOptions",
+            source: source
+          })
+        });
+
+        const data = await res.json();
+
+        if (!data.ok) {
+          statusEl.textContent =
+            "開催情報を取得できませんでした。\n" +
+            (data.message || "");
+          return;
+        }
+
+        reservationOptions = data.options || [];
+
+        if (reservationOptions.length === 0) {
+          statusEl.textContent =
+            "現在、受付中の開催はありません。";
+          return;
+        }
+
+        renderEventDateOptions();
+
+        statusEl.textContent = "";
+        formEl.classList.remove("hidden");
+
+      } catch (err) {
+        statusEl.textContent =
+          "開催情報の取得中にエラーが発生しました。\n" +
+          err.message;
+      }
+    }
+
+    function renderEventDateOptions() {
+      eventDateEl.innerHTML =
+        '<option value="">選択してください</option>';
+
+      reservationOptions.forEach(function(option) {
+        const date = option.eventDate;
+        const label = date;
+
+        eventDateEl.innerHTML +=
+          '<option value="' + escapeHtml(date) + '">' +
+          escapeHtml(label) +
+          '</option>';
+      });
+    }
+
+    function renderProgramOptions(eventDate) {
+      selectedEvent = reservationOptions.find(function(option) {
+        return option.eventDate === eventDate;
+      });
+
+      programListEl.innerHTML = "";
+
+      if (!selectedEvent) {
+        return;
+      }
+
+      const programs = [];
+
+      if (selectedEvent.first) {
+        programs.push({
+          value: "第1部",
+          data: selectedEvent.first
+        });
+      }
+
+      if (selectedEvent.second) {
+        programs.push({
+          value: "第2部",
+          data: selectedEvent.second
+        });
+      }
+
+      if (selectedEvent.both) {
+        programs.push({
+          value: "両方",
+          data: selectedEvent.both
+        });
+      }
+
+      programs.forEach(function(item) {
+        const data = item.data;
+        const disabled = !data.available;
+
+        let timeText = "";
+
+        if (data.startTime || data.endTime) {
+          timeText =
+            escapeHtml(data.startTime || "") +
+            " - " +
+            escapeHtml(data.endTime || "");
+        }
+
+        const priceText =
+          data.price
+            ? "¥" + Number(data.price).toLocaleString("ja-JP")
+            : "";
+
+        const remainingText =
+          data.available
+            ? "残り " + data.remaining + "名"
+            : "満席";
+
+        const id =
+          "program_" +
+          item.value.replaceAll("第", "").replaceAll("部", "");
+
+        programListEl.innerHTML += `
+          <label class="program-option ${disabled ? "disabled" : ""}">
+            <input
+              type="radio"
+              name="program"
+              value="${escapeHtml(item.value)}"
+              ${disabled ? "disabled" : ""}
+              required
+            >
+            <span class="program-title">
+              ${escapeHtml(item.value)}
+            </span>
+            <div class="program-meta">
+              ${timeText ? timeText + "<br>" : ""}
+              ${priceText}
+              ${priceText ? " / " : ""}
+              ${remainingText}
+            </div>
+          </label>
+        `;
+      });
+    }
+
+    async function submitReservation(e) {
+      e.preventDefault();
+
+      const programInput =
+        document.querySelector('input[name="program"]:checked');
+
+      const email =
+        document.getElementById("email").value.trim();
+
+      const emailConfirm =
+        document.getElementById("emailConfirm").value.trim();
+
+      const allergyStatus =
+        document.getElementById("allergyStatus").value;
+
+      const allergyDetail =
+        document.getElementById("allergyDetail").value.trim();
+
+      if (!eventDateEl.value) {
+        alert("開催日を選択してください。");
+        return;
+      }
+
+      if (!programInput) {
+        alert("参加部を選択してください。");
+        return;
+      }
+
+      if (email !== emailConfirm) {
+        alert("メールアドレスが一致していません。");
+        return;
+      }
+
+      if (allergyStatus === "あり" && !allergyDetail) {
+        alert("アレルギー内容を入力してください。");
+        return;
+      }
+
+      const confirmed =
+        confirm("この内容で予約を送信しますか？");
+
+      if (!confirmed) {
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = "送信中...";
+      statusEl.textContent = "";
+
+      try {
+        const payload = new URLSearchParams({
+          action: "submitReservation",
+          source: source,
+          eventDate: eventDateEl.value,
+          program: programInput.value,
+          name: document.getElementById("name").value.trim(),
+          kana: document.getElementById("kana").value.trim(),
+          email: email,
+          emailConfirm: emailConfirm,
+          people: document.getElementById("people").value,
+          signLevel: document.getElementById("signLevel").value,
+          paymentMethod: document.getElementById("paymentMethod").value,
+          allergyStatus: allergyStatus,
+          allergyDetail: allergyDetail,
+          dislikedFoods: document.getElementById("dislikedFoods").value.trim(),
+          snsNg: document.getElementById("snsNg").value,
+          receiptNeed: document.getElementById("receiptNeed").value,
+          note: document.getElementById("note").value.trim()
+        });
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: payload
+        });
+
+        const data = await res.json();
+
+        if (!data.ok) {
+          handleSubmitError(data.message);
+          submitButton.disabled = false;
+          submitButton.textContent = "予約する";
+          return;
+        }
+
+        formEl.classList.add("hidden");
+        statusEl.textContent = "";
+
+        completeAreaEl.innerHTML = `
+          <div class="complete">
+            <strong>お申し込みを受け付けました。</strong><br><br>
+            申込番号：${escapeHtml(data.reservationId || "")}<br>
+            参加費：${data.amount ? "¥" + Number(data.amount).toLocaleString("ja-JP") : ""}<br><br>
+            ご入力いただいたメールアドレス宛に受付完了メールをお送りしました。
+          </div>
+        `;
+
+      } catch (err) {
+        alert(
+          "送信中にエラーが発生しました。\n" +
+          err.message
+        );
+
+        submitButton.disabled = false;
+        submitButton.textContent = "予約する";
+      }
+    }
+
+    function handleSubmitError(message) {
+      const messages = {
+        event_date_required: "開催日を選択してください。",
+        invalid_program: "参加部を選択してください。",
+        name_required: "お名前を入力してください。",
+        kana_required: "お名前（カナ）を入力してください。",
+        email_required: "メールアドレスを入力してください。",
+        email_not_match: "メールアドレスが一致していません。",
+        invalid_email: "メールアドレスの形式が正しくありません。",
+        invalid_people: "参加人数を確認してください。",
+        sign_level_required: "手話レベルを選択してください。",
+        payment_method_required: "決済方法を選択してください。",
+        allergy_status_required: "アレルギーの有無を選択してください。",
+        allergy_detail_required: "アレルギー内容を入力してください。",
+        event_not_found: "この開催は現在受付できません。",
+        first_full: "第1部は満席です。",
+        second_full: "第2部は満席です。"
+      };
+
+      alert(
+        messages[message] ||
+        "予約を受け付けできませんでした。\n" +
+        (message || "")
+      );
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+</html>
