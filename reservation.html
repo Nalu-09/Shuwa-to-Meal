@@ -371,84 +371,67 @@ textarea {
     }
 
     function renderProgramOptions(eventDate) {
-      selectedEvent = reservationOptions.find(function(option) {
-        return option.eventDate === eventDate;
-      });
+  selectedEvent = reservationOptions.find(function(option) {
+    return option.eventDate === eventDate;
+  });
 
-      programListEl.innerHTML = "";
+  programListEl.innerHTML = "";
 
-      if (!selectedEvent) {
-        return;
-      }
+  if (
+    !selectedEvent ||
+    !Array.isArray(selectedEvent.services)
+  ) {
+    return;
+  }
 
-      const programs = [];
+  selectedEvent.services.forEach(function(service) {
+    const disabled = !service.available;
 
-      if (selectedEvent.first) {
-        programs.push({
-          value: "第1部",
-          data: selectedEvent.first
-        });
-      }
+    const timeText =
+      service.startTime || service.endTime
+        ? escapeHtml(service.startTime || "") +
+          " - " +
+          escapeHtml(service.endTime || "")
+        : "";
 
-      if (selectedEvent.second) {
-        programs.push({
-          value: "第2部",
-          data: selectedEvent.second
-        });
-      }
+    const priceText =
+      Number(service.price || 0) > 0
+        ? "¥" +
+          Number(service.price).toLocaleString("ja-JP")
+        : "";
 
-      if (selectedEvent.both) {
-        programs.push({
-          value: "両方",
-          data: selectedEvent.both
-        });
-      }
+    const remainingText =
+      service.available
+        ? "残り " + service.remaining + "名"
+        : "満席";
 
-      programs.forEach(function(item) {
-        const data = item.data;
-        const disabled = !data.available;
+    programListEl.innerHTML += `
+      <label class="program-option ${disabled ? "disabled" : ""}">
+        <input
+          type="radio"
+          name="program"
+          value="${escapeHtml(service.serviceName)}"
+          data-service-id="${escapeHtml(service.serviceId)}"
+          data-price="${Number(service.price || 0)}"
+          data-remaining="${Number(service.remaining || 0)}"
+          ${disabled ? "disabled" : ""}
+          required
+        >
 
-        let timeText = "";
+        <span class="program-title">
+          ${escapeHtml(service.serviceName)}
+        </span>
 
-        if (data.startTime || data.endTime) {
-          timeText =
-            escapeHtml(data.startTime || "") +
-            " - " +
-            escapeHtml(data.endTime || "");
-        }
-
-        const priceText =
-          data.price
-            ? "¥" + Number(data.price).toLocaleString("ja-JP")
-            : "";
-
-        const remainingText =
-          data.available
-            ? "残り " + data.remaining + "名"
-            : "満席";
-
-        programListEl.innerHTML += `
-          <label class="program-option ${disabled ? "disabled" : ""}">
-            <input
-              type="radio"
-              name="program"
-              value="${escapeHtml(item.value)}"
-              ${disabled ? "disabled" : ""}
-              required
-            >
-            <span class="program-title">
-              ${escapeHtml(item.value)}
-            </span>
-            <div class="program-meta">
-              ${timeText ? timeText + "<br>" : ""}
-              ${priceText}
-              ${priceText ? " / " : ""}
-              ${remainingText}
-            </div>
-          </label>
-        `;
-      });
-    }
+        <div class="program-meta">
+          ${timeText ? timeText + "<br>" : ""}
+          ${priceText}
+          ${priceText ? " / " : ""}
+          ${remainingText}
+        </div>
+      </label>
+    `;
+  });
+}
 
     function renderCompanionFields() {
       const people = Number(
@@ -659,9 +642,9 @@ textarea {
         return;
       }
 
-      if (!validateCapacityForPeople(programInput.value)) {
-        return;
-      }
+      if (!validateCapacityForPeople()) {
+  return;
+}
 
       if (!validateCompanions()) {
         return;
@@ -683,7 +666,8 @@ textarea {
           action: "submitReservation",
           source: source,
           eventDate: eventDateEl.value,
-          program: programInput.value,
+serviceId: programInput.dataset.serviceId || "",
+program: programInput.value,
           name: document.getElementById("name").value.trim(),
           kana: document.getElementById("kana").value.trim(),
           email: email,
@@ -737,39 +721,35 @@ textarea {
       }
     }
 
-    function validateCapacityForPeople(program) {
-      const people = Number(
-        document.getElementById("people").value || 1
-      );
+    function validateCapacityForPeople() {
+  const people = Number(
+    document.getElementById("people").value || 1
+  );
 
-      if (!selectedEvent) {
-        return true;
-      }
+  const programInput =
+    document.querySelector(
+      'input[name="program"]:checked'
+    );
 
-      let remaining = 999;
+  if (!programInput) {
+    return true;
+  }
 
-      if (program === "第1部" && selectedEvent.first) {
-        remaining = Number(selectedEvent.first.remaining || 0);
-      }
+  const remaining = Number(
+    programInput.dataset.remaining || 0
+  );
 
-      if (program === "第2部" && selectedEvent.second) {
-        remaining = Number(selectedEvent.second.remaining || 0);
-      }
+  if (people > remaining) {
+    alert(
+      "選択した参加枠の残席数を超えています。\n" +
+      "残席：" + remaining + "名"
+    );
 
-      if (program === "両方" && selectedEvent.both) {
-        remaining = Number(selectedEvent.both.remaining || 0);
-      }
+    return false;
+  }
 
-      if (people > remaining) {
-        alert(
-          "選択した参加部の残席数を超えています。\n" +
-          "残席：" + remaining + "名"
-        );
-        return false;
-      }
-
-      return true;
-    }
+  return true;
+}
 
     function validateCompanions() {
       const people = Number(
