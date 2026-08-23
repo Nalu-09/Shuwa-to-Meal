@@ -313,7 +313,72 @@ textarea {
 
     formEl.addEventListener("submit", submitReservation);
 
-    loadReservationOptions();
+    const LIFF_ID = "2007730715-4D7Hm03q";
+
+async function loadLiffSdk() {
+  if (window.liff) {
+    return;
+  }
+
+  await new Promise(function(resolve, reject) {
+    const script = document.createElement("script");
+
+    script.src =
+      "https://static.line-scdn.net/liff/edge/2/sdk.js";
+
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = function() {
+      reject(
+        new Error(
+          "LIFF SDKを読み込めませんでした。"
+        )
+      );
+    };
+
+    document.head.appendChild(script);
+  });
+}
+
+
+async function start() {
+  try {
+
+    /*
+     * 一般Webからのアクセス
+     */
+    if (source !== "line") {
+      await loadReservationOptions();
+      return;
+    }
+
+    /*
+     * LINE / LIFFからのアクセス
+     */
+    statusEl.textContent =
+      "予約フォームを起動しています...";
+
+    await loadLiffSdk();
+
+    await liff.init({
+      liffId: LIFF_ID
+    });
+
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
+
+    await loadReservationOptions();
+
+  } catch (error) {
+    statusEl.textContent =
+      "起動中にエラーが発生しました。\n" +
+      error.message;
+  }
+}
+    
+    start();
 
     async function loadReservationOptions() {
       try {
