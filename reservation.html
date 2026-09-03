@@ -104,6 +104,22 @@ textarea {
       line-height: 1.6;
     }
 
+    .payment-guide {
+  margin-top: 14px;
+  padding: 16px 18px;
+  border: 1px solid rgba(47,42,38,.12);
+  border-radius: 16px;
+  background: #faf7f3;
+  font-size: 13px;
+  line-height: 1.9;
+  text-align: left;
+}
+
+.payment-guide strong {
+  font-size: 14px;
+  font-weight: normal;
+}
+    
     .hidden {
       display: none;
     }
@@ -223,6 +239,11 @@ textarea {
           <option value="銀行振込">銀行振込</option>
         </select>
 
+        <div
+  id="paymentGuide"
+  class="payment-guide hidden"
+></div>
+
         <label>アレルギーの有無</label>
         <select id="allergyStatus" required>
           <option value="">選択してください</option>
@@ -278,7 +299,8 @@ textarea {
       new URLSearchParams(location.search).get("source") || "web";
 
     let reservationOptions = [];
-    let selectedEvent = null;
+let selectedEvent = null;
+let paymentSettings = {};
 
     const statusEl = document.getElementById("status");
     const formEl = document.getElementById("reservationForm");
@@ -290,6 +312,13 @@ textarea {
     document
       .getElementById("people")
       .addEventListener("change", renderCompanionFields);
+
+    document
+  .getElementById("paymentMethod")
+  .addEventListener(
+    "change",
+    renderPaymentGuide
+  );
 
     document
       .getElementById("allergyStatus")
@@ -402,6 +431,8 @@ async function start() {
         }
 
         reservationOptions = data.options || [];
+        paymentSettings =
+  data.paymentSettings || {};
 
         if (reservationOptions.length === 0) {
           statusEl.textContent =
@@ -641,6 +672,59 @@ async function start() {
         detail.value = "";
       }
     }
+
+    function renderPaymentGuide() {
+  const method =
+    document.getElementById(
+      "paymentMethod"
+    ).value;
+
+  const box =
+    document.getElementById(
+      "paymentGuide"
+    );
+
+  if (method === "銀行振込") {
+    box.innerHTML =
+      "<strong>お支払い先</strong><br><br>" +
+      escapeHtml(paymentSettings.bankName || "") +
+      "<br>" +
+      escapeHtml(paymentSettings.branchName || "") +
+      "<br>" +
+      escapeHtml(paymentSettings.accountType || "") +
+      " " +
+      escapeHtml(paymentSettings.accountNumber || "") +
+      "<br>" +
+      "口座名義：" +
+      escapeHtml(paymentSettings.accountName || "") +
+      "<br><br>" +
+      "※お申し込み完了メールにも同じ情報を記載します。";
+
+    box.classList.remove("hidden");
+    return;
+  }
+
+  if (method === "PayPay") {
+    box.innerHTML =
+      "<strong>お支払い先</strong><br><br>" +
+      "PayPay ID：" +
+      escapeHtml(paymentSettings.paypayId || "") +
+      "<br>" +
+      "受け取り名義：" +
+      escapeHtml(paymentSettings.paypayName || "") +
+      "<br><br>" +
+      "※お申し込み完了メールにも同じ情報を記載します。";
+
+    box.classList.remove("hidden");
+    return;
+  }
+
+  box.classList.add("hidden");
+  box.innerHTML = "";
+}
+
+
+function toggleCompanionReceipt(index) {
 
     function toggleCompanionReceipt(index) {
       const paymentMethod = document.getElementById(
