@@ -2080,6 +2080,7 @@ function showReceiptQr(
     return;
   }
 
+      setupVenueSelect();
 
   /*
    * 会場マスター反映
@@ -2119,6 +2120,59 @@ function showReceiptQr(
 
   }
 }
+    function setupVenueSelect() {
+  if (!serviceManagementData) {
+    return;
+  }
+
+  const venueSelect =
+    document.getElementById(
+      "slotVenue"
+    );
+
+  if (!venueSelect) {
+    return;
+  }
+
+  venueSelect.innerHTML =
+    '<option value="">会場を選択</option>';
+
+  const venues =
+    serviceManagementData.venues || [];
+
+  venues.forEach(function(venue) {
+
+    const venueId =
+      String(
+        venue["会場ID"] || ""
+      ).trim();
+
+    const venueName =
+      String(
+        venue["会場名"] || ""
+      ).trim();
+
+    if (!venueId) {
+      return;
+    }
+
+    const option =
+      document.createElement(
+        "option"
+      );
+
+    option.value =
+      venueId;
+
+    option.textContent =
+      venueName;
+
+    venueSelect.appendChild(
+      option
+    );
+  });
+}
+    
 
     function handleVenueChange() {
   if (!serviceManagementData) {
