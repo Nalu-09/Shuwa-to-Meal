@@ -411,7 +411,12 @@
       <label class="form-label">
         プログラム
       </label>
-      <select id="slotProgram"></select>
+      <select
+  id="slotProgram"
+  class="service-form-control"
+  onchange="handleProgramChange()"
+>
+</select>
 
       <label class="form-label">
         開催日
@@ -1929,6 +1934,10 @@ if (permissions.editSchedule) {
 }
 
     function handleProgramChange() {
+  if (!serviceManagementData) {
+    return;
+  }
+
   const venueId =
     document.getElementById(
       "slotVenue"
@@ -1939,14 +1948,43 @@ if (permissions.editSchedule) {
       "slotProgram"
     ).value;
 
-  if (
-    !venueId ||
-    !programId
-  ) {
+  const startTimeInput =
+    document.getElementById(
+      "slotStartTime"
+    );
+
+  const endTimeInput =
+    document.getElementById(
+      "slotEndTime"
+    );
+
+  const capacityInput =
+    document.getElementById(
+      "slotCapacity"
+    );
+
+  const priceInput =
+    document.getElementById(
+      "slotPrice"
+    );
+
+
+  /*
+   * 未選択なら空欄へ戻す
+   */
+  if (!venueId || !programId) {
+    startTimeInput.value = "";
+    endTimeInput.value = "";
+    capacityInput.value = "";
+    priceInput.value = "";
     return;
   }
 
-  const mapping =
+
+  /*
+   * 会場 × プログラムの設定を取得
+   */
+  const venueProgram =
     (
       serviceManagementData
         .venuePrograms || []
@@ -1954,13 +1992,17 @@ if (permissions.editSchedule) {
       return (
         String(
           item["会場ID"] || ""
-        ) === venueId &&
+        ).trim() === venueId &&
         String(
           item["プログラムID"] || ""
-        ) === programId
+        ).trim() === programId
       );
     });
 
+
+  /*
+   * プログラムマスターから料金取得
+   */
   const program =
     (
       serviceManagementData
@@ -1969,32 +2011,42 @@ if (permissions.editSchedule) {
       return (
         String(
           item["プログラムID"] || ""
-        ) === programId
+        ).trim() === programId
       );
     });
 
-  if (mapping) {
-    document.getElementById(
-      "slotStartTime"
-    ).value =
-      mapping["開始時間"] || "";
 
-    document.getElementById(
-      "slotEndTime"
-    ).value =
-      mapping["終了時間"] || "";
+  /*
+   * 時間・基本定員を自動入力
+   */
+  if (venueProgram) {
+    startTimeInput.value =
+      normalizeTimeForInput_(
+        venueProgram["開始時間"]
+      );
 
-    document.getElementById(
-      "slotCapacity"
-    ).value =
-      mapping["基本定員"] || "";
+    endTimeInput.value =
+      normalizeTimeForInput_(
+        venueProgram["終了時間"]
+      );
+
+    capacityInput.value =
+      venueProgram["基本定員"] || "";
+  } else {
+    startTimeInput.value = "";
+    endTimeInput.value = "";
+    capacityInput.value = "";
   }
 
+
+  /*
+   * 基本料金を自動入力
+   */
   if (program) {
-    document.getElementById(
-      "slotPrice"
-    ).value =
+    priceInput.value =
       program["基本料金"] || "";
+  } else {
+    priceInput.value = "";
   }
 }
 
@@ -2185,6 +2237,34 @@ document.getElementById(
       "通信エラー：" +
       err.message;
   }
+}
+
+    function normalizeTimeForInput_(value) {
+  if (!value) {
+    return "";
+  }
+
+  const text =
+    String(value).trim();
+
+  /*
+   * すでに HH:mm
+   */
+  const match =
+    text.match(
+      /^(\d{1,2}):(\d{2})/
+    );
+
+  if (match) {
+    return (
+      String(match[1])
+        .padStart(2, "0") +
+      ":" +
+      match[2]
+    );
+  }
+
+  return "";
 }
     
   </script>
