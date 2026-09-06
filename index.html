@@ -1926,6 +1926,166 @@ if (permissions.editSchedule) {
   }
 }
 
+    async function createServiceSlot() {
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+    alert("スタッフ情報を取得できませんでした。");
+    return;
+  }
+
+  const venueId =
+    document.getElementById("slotVenue").value;
+
+  const programId =
+    document.getElementById("slotProgram").value;
+
+  const eventDate =
+    document.getElementById("slotEventDate").value;
+
+  const startTime =
+    document.getElementById("slotStartTime").value;
+
+  const endTime =
+    document.getElementById("slotEndTime").value;
+
+  const capacity =
+    document.getElementById("slotCapacity").value;
+
+  const price =
+    document.getElementById("slotPrice").value;
+
+  const linePublishAt =
+    document.getElementById("slotLinePublicAt").value;
+
+  const webPublishAt =
+    document.getElementById("slotWebPublicAt").value;
+
+
+  if (!venueId) {
+    alert("会場を選択してください。");
+    return;
+  }
+
+  if (!programId) {
+    alert("プログラムを選択してください。");
+    return;
+  }
+
+  if (!eventDate) {
+    alert("開催日を入力してください。");
+    return;
+  }
+
+  if (!startTime || !endTime) {
+    alert("開催時間を入力してください。");
+    return;
+  }
+
+  if (!capacity) {
+    alert("上限人数を入力してください。");
+    return;
+  }
+
+  if (!price) {
+    alert("料金を入力してください。");
+    return;
+  }
+
+
+  const resultBox =
+    document.getElementById(
+      "serviceCreateResult"
+    );
+
+  resultBox.textContent =
+    "保存中...";
+
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+
+      body: new URLSearchParams({
+        action: "createServiceSlot",
+
+        adminUserId:
+          currentProfile.userId,
+
+        venueId: venueId,
+        programId: programId,
+        eventDate: eventDate,
+        startTime: startTime,
+        endTime: endTime,
+        capacity: capacity,
+        price: price,
+
+        linePublishAt:
+          linePublishAt,
+
+        webPublishAt:
+          webPublishAt
+      })
+    });
+
+    const data =
+      await res.json();
+
+
+    if (!data.ok) {
+      resultBox.textContent =
+        "保存できませんでした：" +
+        (data.message || "");
+
+      return;
+    }
+
+
+    resultBox.textContent =
+      "予約枠を追加しました。";
+
+
+    /*
+     * 最新データを取得し直す
+     */
+    await preloadServiceManagement();
+
+    /*
+     * 入力欄をリセット
+     */
+    document.getElementById(
+      "slotEventDate"
+    ).value = "";
+
+    document.getElementById(
+      "slotLinePublicAt"
+    ).value = "";
+
+    document.getElementById(
+      "slotWebPublicAt"
+    ).value = "";
+
+
+    /*
+     * 代表・運営なら
+     * 既存予約枠一覧も更新
+     */
+    const permissions =
+      serviceManagementData
+        ? serviceManagementData.permissions || {}
+        : {};
+
+    if (permissions.editSchedule) {
+      renderExistingServices();
+    }
+
+  } catch (err) {
+    resultBox.textContent =
+      "通信エラー：" +
+      err.message;
+  }
+}
     
   </script>
 </body>
