@@ -253,6 +253,65 @@
   font-size: 13px;
   text-decoration: underline;
 }
+
+    .service-management-section{
+  margin-top:24px;
+  padding:20px 16px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:18px;
+  background:rgba(255,255,255,.03);
+}
+
+.service-management-title{
+  font-size:20px;
+  margin-bottom:20px;
+  letter-spacing:.06em;
+}
+
+.form-label{
+  display:block;
+  margin-top:16px;
+  margin-bottom:6px;
+  font-size:13px;
+  opacity:.75;
+}
+
+.service-management-section input,
+.service-management-section select{
+  width:100%;
+  box-sizing:border-box;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.16);
+  background:#161616;
+  color:#fff;
+  font-size:15px;
+}
+
+.service-save-button{
+  width:100%;
+  margin-top:24px;
+  padding:14px;
+  border:none;
+  border-radius:999px;
+  background:#fff;
+  color:#000;
+  font-size:15px;
+  cursor:pointer;
+}
+
+.service-slot-card{
+  margin-top:12px;
+  padding:16px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  line-height:1.8;
+}
+
+.service-slot-card .slot-name{
+  font-size:17px;
+  margin-bottom:6px;
+}
     
   </style>
 </head>
@@ -266,14 +325,140 @@
       <div id="pageStatus" class="status">LIFF初期化中...</div>
 
       <div class="menu">
-        <button id="reservationButton" onclick="loadReservations()" disabled>予約管理</button>
-      </div>
+  <button
+    id="reservationButton"
+    onclick="loadReservations()"
+    disabled
+  >
+    予約管理
+  </button>
+
+  <button
+    id="serviceManagementButton"
+    onclick="openServiceManagement()"
+    style="display:none;"
+  >
+    予約枠管理
+  </button>
+</div>
 
       <div id="reservation" class="panel">
         <h2>Reservation</h2>
         <div id="reservationList" class="status">読み込み前です。</div>
       </div>
     </div>
+
+    <div id="serviceManagement" class="panel">
+  <h2>予約枠管理</h2>
+
+  <div id="serviceManagementStatus" class="status">
+    読み込み中...
+  </div>
+
+  <div
+    id="serviceManagementContent"
+    style="display:none;"
+  >
+
+    <div class="service-management-section">
+      <div class="service-management-title">
+        新規予約枠
+      </div>
+
+      <label class="form-label">
+        会場
+      </label>
+      <select id="slotVenue"></select>
+
+      <label class="form-label">
+        プログラム
+      </label>
+      <select id="slotProgram"></select>
+
+      <label class="form-label">
+        開催日
+      </label>
+      <input
+        id="slotEventDate"
+        type="date"
+      >
+
+      <label class="form-label">
+        開始時間
+      </label>
+      <input
+        id="slotStartTime"
+        type="time"
+      >
+
+      <label class="form-label">
+        終了時間
+      </label>
+      <input
+        id="slotEndTime"
+        type="time"
+      >
+
+      <label class="form-label">
+        上限人数
+      </label>
+      <input
+        id="slotCapacity"
+        type="number"
+        min="1"
+      >
+
+      <label class="form-label">
+        料金
+      </label>
+      <input
+        id="slotPrice"
+        type="number"
+        min="0"
+      >
+
+      <label class="form-label">
+        LINE先行公開日時
+      </label>
+      <input
+        id="slotLinePublicAt"
+        type="datetime-local"
+      >
+
+      <label class="form-label">
+        Web一般公開日時
+      </label>
+      <input
+        id="slotWebPublicAt"
+        type="datetime-local"
+      >
+
+      <button
+        class="service-save-button"
+        onclick="createServiceSlot()"
+      >
+        予約枠を追加
+      </button>
+
+      <div
+        id="serviceCreateResult"
+        class="status"
+      ></div>
+    </div>
+
+    <div
+      id="existingServiceSection"
+      class="service-management-section"
+    >
+      <div class="service-management-title">
+        既存予約枠
+      </div>
+
+      <div id="existingServiceList"></div>
+    </div>
+
+  </div>
+</div>
   </div>
 
   <script>
@@ -283,6 +468,7 @@
     let currentProfile = null;
     let allReservations = [];
     let lastScrollY = 0;
+    let serviceManagementData = null;
 
     async function initLiff() {
       const pageStatus = document.getElementById("pageStatus");
@@ -304,7 +490,9 @@
         currentProfile = await liff.getProfile();
 
         pageStatus.textContent = "";
-        reservationButton.disabled = false;
+reservationButton.disabled = false;
+
+await preloadServiceManagement();
 
       } catch (err) {
         pageStatus.textContent =
@@ -314,6 +502,58 @@
         reservationButton.disabled = true;
       }
     }
+
+    async function preloadServiceManagement() {
+  const button =
+    document.getElementById(
+      "serviceManagementButton"
+    );
+
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+    return;
+  }
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+
+      body: new URLSearchParams({
+        action:
+          "getServiceManagementData",
+
+        adminUserId:
+          currentProfile.userId
+      })
+    });
+
+    const data =
+      await res.json();
+
+    /*
+     * 調理補助はここでpermission_denied
+     * → ボタン自体を表示しない
+     */
+    if (!data.ok) {
+      button.style.display =
+        "none";
+
+      return;
+    }
+
+    serviceManagementData =
+      data;
+
+    button.style.display =
+      "block";
+
+  } catch (err) {
+    button.style.display =
+      "none";
+  }
+}
 
     function showPanel(id) {
       const panels = document.querySelectorAll(".panel");
@@ -1440,6 +1680,217 @@ function showReceiptQr(
     </div>
   `;
 }
+
+    function openServiceManagement() {
+  showPanel(
+    "serviceManagement"
+  );
+
+  if (!serviceManagementData) {
+    return;
+  }
+
+  const status =
+    document.getElementById(
+      "serviceManagementStatus"
+    );
+
+  const content =
+    document.getElementById(
+      "serviceManagementContent"
+    );
+
+  status.style.display =
+    "none";
+
+  content.style.display =
+    "block";
+
+  setupVenueSelect();
+
+  renderExistingServices();
+}
+
+    function setupVenueSelect() {
+  const venueSelect =
+    document.getElementById(
+      "slotVenue"
+    );
+
+  const venues =
+    serviceManagementData.venues || [];
+
+  venueSelect.innerHTML =
+    `<option value="">
+       会場を選択
+     </option>`;
+
+  venues.forEach(function(venue) {
+    const venueId =
+      venue["会場ID"] || "";
+
+    const venueName =
+      venue["会場名"] || "";
+
+    venueSelect.innerHTML += `
+      <option value="${escapeHtml(venueId)}">
+        ${escapeHtml(venueName)}
+      </option>
+    `;
+  });
+
+  venueSelect.onchange =
+    handleVenueChange;
+
+  document.getElementById(
+    "slotProgram"
+  ).innerHTML =
+    `<option value="">
+       先に会場を選択
+     </option>`;
+}
+    function handleVenueChange() {
+  const venueId =
+    document.getElementById(
+      "slotVenue"
+    ).value;
+
+  const programSelect =
+    document.getElementById(
+      "slotProgram"
+    );
+
+  programSelect.innerHTML =
+    `<option value="">
+       プログラムを選択
+     </option>`;
+
+  if (!venueId) {
+    return;
+  }
+
+  const mappings =
+    (
+      serviceManagementData
+        .venuePrograms || []
+    ).filter(function(item) {
+      return (
+        String(
+          item["会場ID"] || ""
+        ) === venueId
+      );
+    });
+
+  const programs =
+    serviceManagementData
+      .programs || [];
+
+  mappings.forEach(function(mapping) {
+    const programId =
+      String(
+        mapping["プログラムID"] || ""
+      );
+
+    const program =
+      programs.find(
+        function(item) {
+          return (
+            String(
+              item["プログラムID"] ||
+              ""
+            ) === programId
+          );
+        }
+      );
+
+    if (!program) {
+      return;
+    }
+
+    programSelect.innerHTML += `
+      <option value="${escapeHtml(programId)}">
+        ${escapeHtml(
+          program["プログラム名"] || ""
+        )}
+      </option>
+    `;
+  });
+
+  programSelect.onchange =
+    handleProgramChange;
+}
+
+    function handleProgramChange() {
+  const venueId =
+    document.getElementById(
+      "slotVenue"
+    ).value;
+
+  const programId =
+    document.getElementById(
+      "slotProgram"
+    ).value;
+
+  if (
+    !venueId ||
+    !programId
+  ) {
+    return;
+  }
+
+  const mapping =
+    (
+      serviceManagementData
+        .venuePrograms || []
+    ).find(function(item) {
+      return (
+        String(
+          item["会場ID"] || ""
+        ) === venueId &&
+        String(
+          item["プログラムID"] || ""
+        ) === programId
+      );
+    });
+
+  const program =
+    (
+      serviceManagementData
+        .programs || []
+    ).find(function(item) {
+      return (
+        String(
+          item["プログラムID"] || ""
+        ) === programId
+      );
+    });
+
+  if (mapping) {
+    document.getElementById(
+      "slotStartTime"
+    ).value =
+      mapping["開始時間"] || "";
+
+    document.getElementById(
+      "slotEndTime"
+    ).value =
+      mapping["終了時間"] || "";
+
+    document.getElementById(
+      "slotCapacity"
+    ).value =
+      mapping["基本定員"] || "";
+  }
+
+  if (program) {
+    document.getElementById(
+      "slotPrice"
+    ).value =
+      program["基本料金"] || "";
+  }
+}
+
+    
   </script>
 </body>
 </html>
