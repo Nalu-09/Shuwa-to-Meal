@@ -676,7 +676,6 @@
     <select
       id="slotVenue"
       class="service-form-control"
-      onchange="handleVenueChange()"
     >
       <option value="">
         会場を選択
@@ -2134,6 +2133,17 @@ function showReceiptQr(
     return;
   }
 
+
+  /*
+   * 現在の選択値を保持
+   */
+  const currentValue =
+    venueSelect.value || "";
+
+
+  /*
+   * 会場を再生成
+   */
   venueSelect.innerHTML =
     '<option value="">会場を選択</option>';
 
@@ -2174,8 +2184,44 @@ function showReceiptQr(
     venueSelect.appendChild(
       option
     );
-
   });
+
+
+  /*
+   * 元の選択値がまだ存在すれば戻す
+   */
+  if (
+    currentValue &&
+    Array.from(
+      venueSelect.options
+    ).some(function(option) {
+      return (
+        option.value ===
+        currentValue
+      );
+    })
+  ) {
+    venueSelect.value =
+      currentValue;
+  }
+
+
+  /*
+   * onchangeを確実に接続
+   */
+  venueSelect.onchange =
+    function() {
+      handleVenueChange();
+    };
+
+
+  /*
+   * すでに会場が選択されている場合も
+   * プログラムを即表示
+   */
+  if (venueSelect.value) {
+    handleVenueChange();
+  }
 }
     function handleVenueChange() {
   if (!serviceManagementData) {
