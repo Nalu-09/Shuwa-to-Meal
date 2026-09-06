@@ -2160,16 +2160,17 @@ function showReceiptQr(
 }
 
     function openServiceManagement() {
+
   /*
-   * 予約管理を非表示
+   * 予約管理を閉じる
    */
-  const reservationPanel =
+  const reservation =
     document.getElementById(
       "reservation"
     );
 
-  if (reservationPanel) {
-    reservationPanel.classList.remove(
+  if (reservation) {
+    reservation.classList.remove(
       "active"
     );
   }
@@ -2190,6 +2191,10 @@ function showReceiptQr(
   serviceManagement.style.display =
     "block";
 
+  serviceManagement.classList.add(
+    "active"
+  );
+
 
   if (!serviceManagementData) {
     return;
@@ -2197,53 +2202,41 @@ function showReceiptQr(
 
 
   /*
-   * 会場一覧をセット
+   * 会場マスター反映
    */
   setupVenueSelect();
 
 
   /*
-   * 権限
+   * 既存予約枠の表示権限
    */
   const permissions =
-    serviceManagementData
-      .permissions || {};
+    serviceManagementData.permissions ||
+    {};
 
-
-  /*
-   * 既存予約枠
-   *
-   * 代表・運営のみ表示
-   */
   const existingSection =
     document.getElementById(
       "existingServiceSection"
     );
 
-  if (existingSection) {
+  if (!existingSection) {
+    return;
+  }
 
-    if (permissions.editSchedule) {
-      existingSection.style.display =
-        "block";
 
-      const existingList =
-        document.getElementById(
-          "existingServiceList"
-        );
+  /*
+   * 代表・運営だけ表示
+   */
+  if (permissions.editSchedule) {
 
-      if (existingList) {
-        existingList.innerHTML =
-          '<div class="slot-program-empty">' +
-          '既存予約枠の編集機能はこの後接続します。' +
-          '</div>';
-      }
+    existingSection.style.display =
+      "block";
 
-    } else {
+  } else {
 
-      existingSection.style.display =
-        "none";
+    existingSection.style.display =
+      "none";
 
-    }
   }
 }
 
@@ -2314,12 +2307,6 @@ function showReceiptQr(
     document.getElementById(
       "slotVenue"
     ).value;
-
-
-  const container =
-    document.getElementById(
-      "slotProgramList"
-    );
 
 
   container.innerHTML = "";
