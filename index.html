@@ -2398,21 +2398,37 @@ function showReceiptQr(
 
           <div class="slot-web-setting">
 
-            <label class="slot-web-checkbox-row">
+  <label class="slot-web-checkbox-row">
 
-              <input
-                type="checkbox"
-                class="slot-web-enabled"
-                ${isDefaultWebProgram_(programName)
-                  ? "checked"
-                  : ""}
-              >
+    <input
+      type="checkbox"
+      class="slot-line-enabled"
+      checked
+    >
 
-              Web一般公開する
+    LINE公開する
 
-            </label>
+  </label>
 
-          </div>
+
+  <label
+    class="slot-web-checkbox-row"
+    style="margin-top:8px;"
+  >
+
+    <input
+      type="checkbox"
+      class="slot-web-enabled"
+      ${isDefaultWebProgram_(programName)
+        ? "checked"
+        : ""}
+    >
+
+    Web一般公開する
+
+  </label>
+
+</div>
 
         </div>
       `;
@@ -2559,6 +2575,10 @@ function showReceiptQr(
         ".slot-price"
       ).value;
 
+    const lineEnabled =
+  card.querySelector(
+    ".slot-line-enabled"
+  ).checked;
 
     const webEnabled =
       card.querySelector(
@@ -2591,24 +2611,27 @@ function showReceiptQr(
 
 
     programs.push({
-      programId:
-        programId,
+  programId:
+    programId,
 
-      startTime:
-        startTime,
+  startTime:
+    startTime,
 
-      endTime:
-        endTime,
+  endTime:
+    endTime,
 
-      capacity:
-        Number(capacity),
+  capacity:
+    Number(capacity),
 
-      price:
-        Number(price),
+  price:
+    Number(price),
 
-      webEnabled:
-        webEnabled
-    });
+  lineEnabled:
+    lineEnabled,
+
+  webEnabled:
+    webEnabled
+});
   }
 
 
