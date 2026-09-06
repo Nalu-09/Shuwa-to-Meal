@@ -120,9 +120,13 @@
       line-height: 1.9;
     }
 
-    .summary-card {
-      cursor: pointer;
-    }
+    .summary-card{
+  cursor:default;
+}
+
+.summary-card-clickable{
+  cursor:pointer;
+}
 
     .summary-card:active {
       transform: scale(.99);
@@ -403,137 +407,7 @@ renderProgramSummaries(
           err.message;
       }
     }
-
-    function renderProgramSummaries(
-  summaries,
-  canViewDetails
-) {
-  const list =
-    document.getElementById(
-      "reservationList"
-    );
-
-  list.className = "";
-
-  const groupedByDate = {};
-
-  summaries.forEach(function(item) {
-    const date =
-      item.date || "日程未設定";
-
-    if (!groupedByDate[date]) {
-      groupedByDate[date] = [];
-    }
-
-    groupedByDate[date].push(item);
-  });
-
-  const dates =
-    Object.keys(groupedByDate)
-      .sort();
-
-  let html =
-    '<div class="summary-list">';
-
-  dates.forEach(function(date) {
-    html +=
-      '<div class="summary-date">' +
-      escapeHtml(date) +
-      '</div>';
-
-    const programs =
-      groupedByDate[date];
-
-    programs.sort(function(a, b) {
-      return (
-        programOrder(a.program) -
-        programOrder(b.program)
-      );
-    });
-
-    programs.forEach(function(item) {
-      const program =
-        item.program ||
-        "参加部未設定";
-
-      const people =
-        Number(item.people || 0);
-
-      const allergies =
-        Array.isArray(item.allergies)
-          ? item.allergies
-          : [];
-
-      const allergyHtml =
-        allergies.length
-          ? allergies
-              .map(function(text) {
-                return (
-                  '<div class="summary-allergy-item">' +
-                  escapeHtml(text) +
-                  '</div>'
-                );
-              })
-              .join("")
-          : '<div class="summary-allergy-none">なし</div>';
-
-      if (canViewDetails) {
-        const detailIndex =
-          findReservationGroupIndex(
-            date,
-            program
-          );
-
-        html += `
-          <button
-            type="button"
-            class="summary-card"
-            onclick="openReservationGroup(${detailIndex})"
-          >
-            <div class="summary-program">
-              ${escapeHtml(program)}
-            </div>
-
-            <div class="summary-info">
-              参加人数：${people}名
-            </div>
-
-            <div class="summary-allergy">
-              <div class="summary-label">
-                嗜好NG
-              </div>
-              ${allergyHtml}
-            </div>
-          </button>
-        `;
-      } else {
-        html += `
-          <div class="summary-card summary-card-static">
-            <div class="summary-program">
-              ${escapeHtml(program)}
-            </div>
-
-            <div class="summary-info">
-              参加人数：${people}名
-            </div>
-
-            <div class="summary-allergy">
-              <div class="summary-label">
-                嗜好NG
-              </div>
-              ${allergyHtml}
-            </div>
-          </div>
-        `;
-      }
-    });
-  });
-
-  html += '</div>';
-
-  list.innerHTML = html;
-}
-
+    
     function findReservationGroupIndex(
   date,
   program
@@ -1256,12 +1130,16 @@ scrollToReservationCard(groupIndex, reservationIndex);
 }
     
     function backToSummary() {
-      renderSummary(allReservations);
+      function backToSummary() {
+  renderProgramSummaries(
+    window.currentProgramSummaries || [],
+    Boolean(window.currentCanViewDetails)
+  );
 
-      setTimeout(function() {
-        window.scrollTo(0, lastScrollY);
-      }, 50);
-    }
+  setTimeout(function() {
+    window.scrollTo(0, lastScrollY);
+  }, 50);
+}
 
     function programOrder(program) {
       if (program === "第1部") return 1;
