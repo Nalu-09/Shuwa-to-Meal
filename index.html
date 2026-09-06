@@ -674,13 +674,14 @@
     </label>
 
     <select
-      id="slotVenue"
-      class="service-form-control"
-    >
-      <option value="">
-        会場を選択
-      </option>
-    </select>
+  id="slotVenue"
+  class="service-form-control"
+  onchange="handleVenueChange()"
+>
+  <option value="">
+    会場を選択
+  </option>
+</select>
 
 
     <!-- プログラム -->
@@ -2119,110 +2120,6 @@ function showReceiptQr(
   }
 }
 
-    function setupVenueSelect() {
-  if (!serviceManagementData) {
-    return;
-  }
-
-  const venueSelect =
-    document.getElementById(
-      "slotVenue"
-    );
-
-  if (!venueSelect) {
-    return;
-  }
-
-
-  /*
-   * 現在の選択値を保持
-   */
-  const currentValue =
-    venueSelect.value || "";
-
-
-  /*
-   * 会場を再生成
-   */
-  venueSelect.innerHTML =
-    '<option value="">会場を選択</option>';
-
-
-  const venues =
-    serviceManagementData.venues || [];
-
-
-  venues.forEach(function(venue) {
-
-    const venueId =
-      String(
-        venue["会場ID"] || ""
-      ).trim();
-
-    const venueName =
-      String(
-        venue["会場名"] || ""
-      ).trim();
-
-
-    if (!venueId) {
-      return;
-    }
-
-
-    const option =
-      document.createElement(
-        "option"
-      );
-
-    option.value =
-      venueId;
-
-    option.textContent =
-      venueName;
-
-    venueSelect.appendChild(
-      option
-    );
-  });
-
-
-  /*
-   * 元の選択値がまだ存在すれば戻す
-   */
-  if (
-    currentValue &&
-    Array.from(
-      venueSelect.options
-    ).some(function(option) {
-      return (
-        option.value ===
-        currentValue
-      );
-    })
-  ) {
-    venueSelect.value =
-      currentValue;
-  }
-
-
-  /*
-   * onchangeを確実に接続
-   */
-  venueSelect.onchange =
-    function() {
-      handleVenueChange();
-    };
-
-
-  /*
-   * すでに会場が選択されている場合も
-   * プログラムを即表示
-   */
-  if (venueSelect.value) {
-    handleVenueChange();
-  }
-}
     function handleVenueChange() {
   if (!serviceManagementData) {
     return;
@@ -2233,6 +2130,20 @@ function showReceiptQr(
     document.getElementById(
       "slotVenue"
     ).value;
+
+
+  /*
+   * プログラム表示先
+   */
+  const container =
+    document.getElementById(
+      "slotProgramList"
+    );
+
+
+  if (!container) {
+    return;
+  }
 
 
   container.innerHTML = "";
@@ -2351,8 +2262,10 @@ function showReceiptQr(
           "div"
         );
 
+
       card.className =
         "slot-program-card";
+
 
       card.dataset.programId =
         programId;
@@ -2364,31 +2277,31 @@ function showReceiptQr(
         endTime;
 
 
-     card.innerHTML = `
+      card.innerHTML = `
 
-  <label class="slot-program-main">
+        <label class="slot-program-main">
 
-    <input
-      type="checkbox"
-      class="slot-program-checkbox"
-      onchange="handleProgramCheck(this)"
-    >
+          <input
+            type="checkbox"
+            class="slot-program-checkbox"
+            onchange="handleProgramCheck(this)"
+          >
 
-    <div class="slot-program-info">
+          <div class="slot-program-info">
 
-      <div class="slot-program-name">
-        ${escapeHtml_(programName)}
-      </div>
+            <div class="slot-program-name">
+              ${escapeHtml_(programName)}
+            </div>
 
-      <div class="slot-program-time">
-        ${escapeHtml_(startTime)}
-        〜
-        ${escapeHtml_(endTime)}
-      </div>
+            <div class="slot-program-time">
+              ${escapeHtml_(startTime)}
+              〜
+              ${escapeHtml_(endTime)}
+            </div>
 
-    </div>
+          </div>
 
-  </label>
+        </label>
 
 
         <div class="slot-program-settings">
