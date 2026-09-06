@@ -1731,7 +1731,20 @@ function showReceiptQr(
 
   setupVenueSelect();
 
+const permissions =
+  serviceManagementData.permissions || {};
+
+const existingSection =
+  document.getElementById(
+    "existingServiceSection"
+  );
+
+if (permissions.editSchedule) {
+  existingSection.style.display = "block";
   renderExistingServices();
+} else {
+  existingSection.style.display = "none";
+}
 }
 
     function setupVenueSelect() {
