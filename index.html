@@ -364,14 +364,38 @@
           return;
         }
 
-        allReservations = filterFutureReservations(data.reservations || []);
+        const permissions =
+  data.permissions || {};
 
-        if (allReservations.length === 0) {
-          list.textContent = "今日以降の参加者履歴はありません。";
-          return;
-        }
+const canViewDetails =
+  Boolean(
+    permissions.viewParticipantDetails
+  );
 
-        renderSummary(allReservations);
+const programSummaries =
+  filterFutureReservations(
+    data.programSummaries || []
+  );
+
+allReservations =
+  filterFutureReservations(
+    data.reservations || []
+  );
+
+if (programSummaries.length === 0) {
+  list.textContent =
+    "今日以降の予約はありません。";
+  return;
+}
+
+/*
+ * 全スタッフ共通：
+ * 人数・嗜好NGの一覧を表示
+ */
+renderProgramSummaries(
+  programSummaries,
+  canViewDetails
+);
 
       } catch (err) {
         list.textContent =
@@ -379,6 +403,190 @@
           err.message;
       }
     }
+
+    function renderProgramSummaries(
+  summaries,
+  canViewDetails
+) {
+  const list =
+    document.getElementById(
+      "reservationList"
+    );
+
+  list.className = "";
+
+  const groupedByDate = {};
+
+  summaries.forEach(function(item) {
+    const date =
+      item.date || "日程未設定";
+
+    if (!groupedByDate[date]) {
+      groupedByDate[date] = [];
+    }
+
+    groupedByDate[date].push(item);
+  });
+
+  const dates =
+    Object.keys(groupedByDate)
+      .sort();
+
+  let html =
+    '<div class="summary-list">';
+
+  dates.forEach(function(date) {
+    html +=
+      '<div class="summary-date">' +
+      escapeHtml(date) +
+      '</div>';
+
+    const programs =
+      groupedByDate[date];
+
+    programs.sort(function(a, b) {
+      return (
+        programOrder(a.program) -
+        programOrder(b.program)
+      );
+    });
+
+    programs.forEach(function(item) {
+      const program =
+        item.program ||
+        "参加部未設定";
+
+      const people =
+        Number(item.people || 0);
+
+      const allergies =
+        Array.isArray(item.allergies)
+          ? item.allergies
+          : [];
+
+      const allergyHtml =
+        allergies.length
+          ? allergies
+              .map(function(text) {
+                return (
+                  '<div class="summary-allergy-item">' +
+                  escapeHtml(text) +
+                  '</div>'
+                );
+              })
+              .join("")
+          : '<div class="summary-allergy-none">なし</div>';
+
+      if (canViewDetails) {
+        const detailIndex =
+          findReservationGroupIndex(
+            date,
+            program
+          );
+
+        html += `
+          <button
+            type="button"
+            class="summary-card"
+            onclick="openReservationGroup(${detailIndex})"
+          >
+            <div class="summary-program">
+              ${escapeHtml(program)}
+            </div>
+
+            <div class="summary-info">
+              参加人数：${people}名
+            </div>
+
+            <div class="summary-allergy">
+              <div class="summary-label">
+                嗜好NG
+              </div>
+              ${allergyHtml}
+            </div>
+          </button>
+        `;
+      } else {
+        html += `
+          <div class="summary-card summary-card-static">
+            <div class="summary-program">
+              ${escapeHtml(program)}
+            </div>
+
+            <div class="summary-info">
+              参加人数：${people}名
+            </div>
+
+            <div class="summary-allergy">
+              <div class="summary-label">
+                嗜好NG
+              </div>
+              ${allergyHtml}
+            </div>
+          </div>
+        `;
+      }
+    });
+  });
+
+  html += '</div>';
+
+  list.innerHTML = html;
+}
+
+    function findReservationGroupIndex(
+  date,
+  program
+) {
+  const grouped = {};
+
+  allReservations.forEach(function(r) {
+    const key =
+      (r.date || "") +
+      "___" +
+      (r.program || "");
+
+    if (!grouped[key]) {
+      grouped[key] = {
+        date: r.date || "",
+        program: r.program || "",
+        reservations: []
+      };
+    }
+
+    grouped[key]
+      .reservations
+      .push(r);
+  });
+
+  const groups =
+    Object.values(grouped);
+
+  groups.sort(function(a, b) {
+    if (a.date !== b.date) {
+      return a.date.localeCompare(
+        b.date
+      );
+    }
+
+    return (
+      programOrder(a.program) -
+      programOrder(b.program)
+    );
+  });
+
+  window.reservationGroups =
+    groups;
+
+  return groups.findIndex(
+    function(group) {
+      return (
+        group.date === date &&
+        group.program === program
+      );
+    }
+  );
+}
 
     function renderSummary(reservations) {
       const list = document.getElementById("reservationList");
