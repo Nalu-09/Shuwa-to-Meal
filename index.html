@@ -575,6 +575,33 @@
       max-inline-size: 100% !important;
     }
   }
+
+    .slot-program-main {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.slot-program-checkbox {
+  display: block !important;
+
+  width: 20px !important;
+  height: 20px !important;
+
+  min-width: 20px !important;
+  max-width: 20px !important;
+
+  flex: 0 0 20px;
+
+  margin: 2px 0 0 !important;
+  padding: 0 !important;
+
+  appearance: auto !important;
+  -webkit-appearance: checkbox !important;
+
+  pointer-events: auto !important;
+  cursor: pointer;
+}
     
   </style>
 </head>
@@ -2291,31 +2318,31 @@ function showReceiptQr(
         endTime;
 
 
-      card.innerHTML = `
+     card.innerHTML = `
 
-        <div class="slot-program-main">
+  <label class="slot-program-main">
 
-          <input
-            type="checkbox"
-            class="slot-program-checkbox"
-            onchange="handleProgramCheck(this)"
-          >
+    <input
+      type="checkbox"
+      class="slot-program-checkbox"
+      onchange="handleProgramCheck(this)"
+    >
 
-          <div class="slot-program-info">
+    <div class="slot-program-info">
 
-            <div class="slot-program-name">
-              ${escapeHtml_(programName)}
-            </div>
+      <div class="slot-program-name">
+        ${escapeHtml_(programName)}
+      </div>
 
-            <div class="slot-program-time">
-              ${escapeHtml_(startTime)}
-              〜
-              ${escapeHtml_(endTime)}
-            </div>
+      <div class="slot-program-time">
+        ${escapeHtml_(startTime)}
+        〜
+        ${escapeHtml_(endTime)}
+      </div>
 
-          </div>
+    </div>
 
-        </div>
+  </label>
 
 
         <div class="slot-program-settings">
