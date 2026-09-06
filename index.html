@@ -350,6 +350,378 @@
   line-height: 1.6;
   opacity: 0.65;
 }
+
+    #serviceManagement,
+#serviceManagement * {
+  box-sizing: border-box;
+}
+
+#serviceManagement input,
+#serviceManagement select,
+#serviceManagement textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+#serviceManagement input[type="date"],
+#serviceManagement input[type="time"],
+#serviceManagement input[type="number"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.publish-row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.publish-row > * {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .publish-row {
+    grid-template-columns: 1fr;
+  }
+
+  #serviceManagement input,
+  #serviceManagement select,
+  #serviceManagement textarea {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+
+    /* =========================
+   予約枠管理
+========================= */
+
+#serviceManagement,
+#serviceManagement * {
+  box-sizing: border-box;
+}
+
+#serviceManagement {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.service-management-section {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  padding: 18px;
+  margin-bottom: 18px;
+
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 14px;
+
+  background: #fff;
+}
+
+.service-management-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+
+  margin-top: 18px;
+  margin-bottom: 7px;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.service-form-control,
+#serviceManagement input,
+#serviceManagement select,
+#serviceManagement textarea {
+  display: block;
+
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  padding: 12px;
+
+  border: 1px solid rgba(0,0,0,0.18);
+  border-radius: 10px;
+
+  background: #fff;
+
+  font-size: 16px;
+
+  box-sizing: border-box;
+}
+
+#serviceManagement input[type="date"],
+#serviceManagement input[type="time"],
+#serviceManagement input[type="number"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================
+   プログラム一覧
+========================= */
+
+.slot-program-list {
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.slot-program-empty {
+  padding: 14px;
+
+  border: 1px dashed rgba(0,0,0,0.18);
+  border-radius: 10px;
+
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+
+/* 各プログラム */
+.slot-program-card {
+  width: 100%;
+  min-width: 0;
+
+  padding: 14px;
+
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 12px;
+
+  background: #fff;
+}
+
+
+/* 上部 */
+.slot-program-main {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 10px;
+}
+
+.slot-program-checkbox {
+  width: auto !important;
+  min-width: auto !important;
+
+  margin-top: 3px;
+}
+
+.slot-program-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.slot-program-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.slot-program-time {
+  margin-top: 3px;
+
+  font-size: 13px;
+  opacity: 0.65;
+}
+
+
+/* 選択後の設定欄 */
+.slot-program-settings {
+  display: none;
+
+  margin-top: 14px;
+  padding-top: 14px;
+
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+.slot-program-card.selected
+.slot-program-settings {
+  display: block;
+}
+
+
+/* 定員・料金 */
+.slot-program-setting-grid {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
+  gap: 10px;
+}
+
+.slot-small-label {
+  display: block;
+
+  margin-bottom: 5px;
+
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+
+/* Web公開 */
+.slot-web-setting {
+  margin-top: 12px;
+}
+
+.slot-web-checkbox-row {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 13px;
+}
+
+.slot-web-checkbox-row input {
+  width: auto !important;
+  min-width: auto !important;
+}
+
+
+/* =========================
+   公開日時
+========================= */
+
+.publish-row {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
+  gap: 10px;
+
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.publish-row > * {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  box-sizing: border-box;
+}
+
+.optional-label {
+  margin-left: 4px;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  opacity: 0.6;
+}
+
+.publish-note {
+  margin-top: 6px;
+
+  font-size: 12px;
+  line-height: 1.6;
+
+  opacity: 0.62;
+}
+
+
+/* =========================
+   保存ボタン
+========================= */
+
+.service-save-button {
+  display: block;
+
+  width: 100%;
+
+  margin-top: 22px;
+  padding: 14px;
+
+  border: 0;
+  border-radius: 10px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.service-create-result {
+  min-height: 20px;
+
+  margin-top: 16px;
+
+  font-size: 13px;
+}
+
+
+/* =========================
+   スマートフォン
+========================= */
+
+@media (max-width: 600px) {
+
+  .service-management-section {
+    padding: 14px;
+  }
+
+  .publish-row {
+    grid-template-columns: 1fr;
+  }
+
+  .slot-program-setting-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #serviceManagement input,
+  #serviceManagement select,
+  #serviceManagement textarea {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  #serviceManagement input[type="date"],
+  #serviceManagement input[type="time"],
+  #serviceManagement input[type="number"] {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+}
     
   </style>
 </head>
@@ -386,155 +758,153 @@
       </div>
     </div>
 
-    <div id="serviceManagement" class="panel">
-  <h2>予約枠管理</h2>
+    <div
+  id="serviceManagement"
+  style="display:none;"
+>
 
-  <div id="serviceManagementStatus" class="status">
-    読み込み中...
+  <div class="service-management-section">
+
+    <div class="service-management-title">
+      予約枠管理
+    </div>
+
+
+    <!-- 開催日 -->
+    <label class="form-label">
+      開催日
+    </label>
+
+    <input
+      type="date"
+      id="slotEventDate"
+      class="service-form-control"
+    >
+
+
+    <!-- 会場 -->
+    <label class="form-label">
+      会場
+    </label>
+
+    <select
+      id="slotVenue"
+      class="service-form-control"
+      onchange="handleVenueChange()"
+    >
+      <option value="">
+        会場を選択
+      </option>
+    </select>
+
+
+    <!-- プログラム -->
+    <label class="form-label">
+      プログラム
+    </label>
+
+    <div
+      id="slotProgramList"
+      class="slot-program-list"
+    >
+      <div class="slot-program-empty">
+        会場を選択してください。
+      </div>
+    </div>
+
+
+    <!-- LINE先行公開 -->
+    <label class="form-label">
+      LINE先行公開
+    </label>
+
+    <div class="publish-row">
+
+      <input
+        type="date"
+        id="slotLinePublishDate"
+        class="service-form-control"
+      >
+
+      <input
+        type="time"
+        id="slotLinePublishTime"
+        class="service-form-control"
+      >
+
+    </div>
+
+    <div class="publish-note">
+      時間が空欄の場合は、指定した日の0:00から公開されます。
+    </div>
+
+
+    <!-- Web一般公開 -->
+    <label class="form-label">
+      Web一般公開
+      <span class="optional-label">
+        ※任意
+      </span>
+    </label>
+
+    <div class="publish-row">
+
+      <input
+        type="date"
+        id="slotWebPublishDate"
+        class="service-form-control"
+      >
+
+      <input
+        type="time"
+        id="slotWebPublishTime"
+        class="service-form-control"
+      >
+
+    </div>
+
+    <div class="publish-note">
+      公開日が空欄の場合はWebでは公開されません。<br>
+      時間が空欄の場合は、指定した日の0:00から公開されます。
+    </div>
+
+
+    <!-- 保存結果 -->
+    <div
+      id="serviceCreateResult"
+      class="service-create-result"
+    ></div>
+
+
+    <!-- 保存 -->
+    <button
+      type="button"
+      class="service-save-button"
+      onclick="createServiceSlot()"
+    >
+      予約枠を追加
+    </button>
+
   </div>
 
+
+  <!-- 既存予約枠 -->
   <div
-    id="serviceManagementContent"
-    style="display:none;"
+    id="existingServiceSection"
+    class="service-management-section"
   >
 
-    <div class="service-management-section">
-      <div class="service-management-title">
-        新規予約枠
-      </div>
-
-      <label class="form-label">
-        会場
-      </label>
-      <select id="slotVenue"></select>
-
-      <label class="form-label">
-        プログラム
-      </label>
-      <select
-  id="slotProgram"
-  class="service-form-control"
-  onchange="handleProgramChange()"
->
-</select>
-
-      <label class="form-label">
-        開催日
-      </label>
-      <input
-        id="slotEventDate"
-        type="date"
-        class="service-form-control"
-      >
-
-      <label class="form-label">
-        開始時間
-      </label>
-      <input
-        id="slotStartTime"
-        type="time"
-        class="service-form-control"
-      >
-
-      <label class="form-label">
-        終了時間
-      </label>
-      <input
-        id="slotEndTime"
-        type="time"
-        class="service-form-control"
-      >
-
-      <label class="form-label">
-        上限人数
-      </label>
-      <input
-        id="slotCapacity"
-        type="number"
-        min="1"
-        class="service-form-control"
-      >
-
-      <label class="form-label">
-        料金
-      </label>
-      <input
-        id="slotPrice"
-        type="number"
-        min="0"
-        class="service-form-control"
-      >
-
-      <label class="form-label">
-  LINE先行公開
-</label>
-
-<div class="publish-row">
-  <input
-    type="date"
-    id="slotLinePublishDate"
-    class="service-form-control"
-  >
-
-  <input
-    type="time"
-    id="slotLinePublishTime"
-    class="service-form-control"
-  >
-</div>
-      <div class="publish-note">
-  時間が空欄の場合は、指定した日の0:00から公開されます。
-</div>
-
-      <label class="form-label">
-  Web一般公開
-  <span class="optional-label">※任意</span>
-</label>
-
-<div class="publish-row">
-  <input
-    type="date"
-    id="slotWebPublishDate"
-    class="service-form-control"
-  >
-
-  <input
-    type="time"
-    id="slotWebPublishTime"
-    class="service-form-control"
-  >
-</div>
-
-<div class="publish-note">
-  公開日が空欄の場合はWebでは公開されません。<br>
-  時間が空欄の場合は、指定した日の0:00から公開されます。
-</div>
-
-      <button
-        class="service-save-button"
-        onclick="createServiceSlot()"
-      >
-        予約枠を追加
-      </button>
-
-      <div
-        id="serviceCreateResult"
-        class="status"
-      ></div>
+    <div class="service-management-title">
+      既存予約枠
     </div>
 
     <div
-      id="existingServiceSection"
-      class="service-management-section"
-    >
-      <div class="service-management-title">
-        既存予約枠
-      </div>
-
-      <div id="existingServiceList"></div>
-    </div>
+      id="existingServiceList"
+    ></div>
 
   </div>
+
+</div>
 </div>
   </div>
 
@@ -1825,310 +2195,487 @@ if (permissions.editSchedule) {
 }
 
     function setupVenueSelect() {
+  if (!serviceManagementData) {
+    return;
+  }
+
   const venueSelect =
     document.getElementById(
       "slotVenue"
     );
 
-  const venues =
-    serviceManagementData.venues || [];
-
-  venueSelect.innerHTML =
-    `<option value="">
-       会場を選択
-     </option>`;
-
-  venues.forEach(function(venue) {
-    const venueId =
-      venue["会場ID"] || "";
-
-    const venueName =
-      venue["会場名"] || "";
-
-    venueSelect.innerHTML += `
-      <option value="${escapeHtml(venueId)}">
-        ${escapeHtml(venueName)}
-      </option>
-    `;
-  });
-
-  venueSelect.onchange =
-    handleVenueChange;
-
-  document.getElementById(
-    "slotProgram"
-  ).innerHTML =
-    `<option value="">
-       先に会場を選択
-     </option>`;
-}
-    function handleVenueChange() {
-  const venueId =
-    document.getElementById(
-      "slotVenue"
-    ).value;
-
-  const programSelect =
-    document.getElementById(
-      "slotProgram"
-    );
-
-  programSelect.innerHTML =
-    `<option value="">
-       プログラムを選択
-     </option>`;
-
-  if (!venueId) {
+  if (!venueSelect) {
     return;
   }
 
-  const mappings =
-    (
-      serviceManagementData
-        .venuePrograms || []
-    ).filter(function(item) {
-      return (
-        String(
-          item["会場ID"] || ""
-        ) === venueId
-      );
-    });
+  venueSelect.innerHTML =
+    '<option value="">会場を選択</option>';
 
-  const programs =
-    serviceManagementData
-      .programs || [];
 
-  mappings.forEach(function(mapping) {
-    const programId =
+  const venues =
+    serviceManagementData.venues || [];
+
+
+  venues.forEach(function(venue) {
+
+    const venueId =
       String(
-        mapping["プログラムID"] || ""
-      );
+        venue["会場ID"] || ""
+      ).trim();
 
-    const program =
-      programs.find(
-        function(item) {
-          return (
-            String(
-              item["プログラムID"] ||
-              ""
-            ) === programId
-          );
-        }
-      );
+    const venueName =
+      String(
+        venue["会場名"] || ""
+      ).trim();
 
-    if (!program) {
+
+    if (!venueId) {
       return;
     }
 
-    programSelect.innerHTML += `
-      <option value="${escapeHtml(programId)}">
-        ${escapeHtml(
-          program["プログラム名"] || ""
-        )}
-      </option>
-    `;
+
+    const option =
+      document.createElement(
+        "option"
+      );
+
+    option.value =
+      venueId;
+
+    option.textContent =
+      venueName;
+
+    venueSelect.appendChild(
+      option
+    );
+
   });
-
-  programSelect.onchange =
-    handleProgramChange;
 }
-
-    function handleProgramChange() {
+    function handleVenueChange() {
   if (!serviceManagementData) {
     return;
   }
 
+
   const venueId =
     document.getElementById(
       "slotVenue"
     ).value;
 
-  const programId =
-    document.getElementById(
-      "slotProgram"
-    ).value;
 
-  const startTimeInput =
+  const container =
     document.getElementById(
-      "slotStartTime"
-    );
-
-  const endTimeInput =
-    document.getElementById(
-      "slotEndTime"
-    );
-
-  const capacityInput =
-    document.getElementById(
-      "slotCapacity"
-    );
-
-  const priceInput =
-    document.getElementById(
-      "slotPrice"
+      "slotProgramList"
     );
 
 
-  /*
-   * 未選択なら空欄へ戻す
-   */
-  if (!venueId || !programId) {
-    startTimeInput.value = "";
-    endTimeInput.value = "";
-    capacityInput.value = "";
-    priceInput.value = "";
+  container.innerHTML = "";
+
+
+  if (!venueId) {
+    container.innerHTML =
+      '<div class="slot-program-empty">' +
+      '会場を選択してください。' +
+      '</div>';
+
     return;
   }
 
 
   /*
-   * 会場 × プログラムの設定を取得
+   * この会場に紐づく
+   * プログラムだけ取得
    */
-  const venueProgram =
+  const venuePrograms =
     (
       serviceManagementData
         .venuePrograms || []
-    ).find(function(item) {
+    ).filter(function(item) {
+
       return (
         String(
           item["会場ID"] || ""
-        ).trim() === venueId &&
-        String(
-          item["プログラムID"] || ""
-        ).trim() === programId
+        ).trim() === venueId
       );
+
     });
 
 
-  /*
-   * プログラムマスターから料金取得
-   */
-  const program =
-    (
-      serviceManagementData
-        .programs || []
-    ).find(function(item) {
-      return (
+  if (!venuePrograms.length) {
+    container.innerHTML =
+      '<div class="slot-program-empty">' +
+      'この会場に登録されたプログラムがありません。' +
+      '</div>';
+
+    return;
+  }
+
+
+  venuePrograms.forEach(
+    function(venueProgram) {
+
+      const programId =
         String(
-          item["プログラムID"] || ""
-        ).trim() === programId
+          venueProgram[
+            "プログラムID"
+          ] || ""
+        ).trim();
+
+
+      const program =
+        (
+          serviceManagementData
+            .programs || []
+        ).find(function(item) {
+
+          return (
+            String(
+              item[
+                "プログラムID"
+              ] || ""
+            ).trim() === programId
+          );
+
+        });
+
+
+      if (!program) {
+        return;
+      }
+
+
+      const programName =
+        String(
+          program[
+            "プログラム名"
+          ] || ""
+        ).trim();
+
+
+      const startTime =
+        normalizeTimeForInput_(
+          venueProgram[
+            "開始時間"
+          ]
+        );
+
+
+      const endTime =
+        normalizeTimeForInput_(
+          venueProgram[
+            "終了時間"
+          ]
+        );
+
+
+      const capacity =
+        venueProgram[
+          "基本定員"
+        ] || "";
+
+
+      const price =
+        program[
+          "基本料金"
+        ] || "";
+
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+      card.className =
+        "slot-program-card";
+
+      card.dataset.programId =
+        programId;
+
+      card.dataset.startTime =
+        startTime;
+
+      card.dataset.endTime =
+        endTime;
+
+
+      card.innerHTML = `
+
+        <div class="slot-program-main">
+
+          <input
+            type="checkbox"
+            class="slot-program-checkbox"
+            onchange="handleProgramCheck(this)"
+          >
+
+          <div class="slot-program-info">
+
+            <div class="slot-program-name">
+              ${escapeHtml_(programName)}
+            </div>
+
+            <div class="slot-program-time">
+              ${escapeHtml_(startTime)}
+              〜
+              ${escapeHtml_(endTime)}
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="slot-program-settings">
+
+          <div class="slot-program-setting-grid">
+
+            <div>
+
+              <label class="slot-small-label">
+                上限人数
+              </label>
+
+              <input
+                type="number"
+                class="service-form-control slot-capacity"
+                min="1"
+                value="${escapeHtml_(capacity)}"
+              >
+
+            </div>
+
+
+            <div>
+
+              <label class="slot-small-label">
+                料金
+              </label>
+
+              <input
+                type="number"
+                class="service-form-control slot-price"
+                min="0"
+                value="${escapeHtml_(price)}"
+              >
+
+            </div>
+
+          </div>
+
+
+          <div class="slot-web-setting">
+
+            <label class="slot-web-checkbox-row">
+
+              <input
+                type="checkbox"
+                class="slot-web-enabled"
+                ${isDefaultWebProgram_(programName)
+                  ? "checked"
+                  : ""}
+              >
+
+              Web一般公開する
+
+            </label>
+
+          </div>
+
+        </div>
+      `;
+
+
+      container.appendChild(
+        card
       );
-    });
 
-
-  /*
-   * 時間・基本定員を自動入力
-   */
-  if (venueProgram) {
-    startTimeInput.value =
-      normalizeTimeForInput_(
-        venueProgram["開始時間"]
-      );
-
-    endTimeInput.value =
-      normalizeTimeForInput_(
-        venueProgram["終了時間"]
-      );
-
-    capacityInput.value =
-      venueProgram["基本定員"] || "";
-  } else {
-    startTimeInput.value = "";
-    endTimeInput.value = "";
-    capacityInput.value = "";
-  }
-
-
-  /*
-   * 基本料金を自動入力
-   */
-  if (program) {
-    priceInput.value =
-      program["基本料金"] || "";
-  } else {
-    priceInput.value = "";
-  }
+    }
+  );
 }
 
     async function createServiceSlot() {
+
   if (
     !currentProfile ||
     !currentProfile.userId
   ) {
-    alert("スタッフ情報を取得できませんでした。");
+    alert(
+      "スタッフ情報を取得できませんでした。"
+    );
+
     return;
   }
 
-  const venueId =
-    document.getElementById("slotVenue").value;
-
-  const programId =
-    document.getElementById("slotProgram").value;
 
   const eventDate =
-    document.getElementById("slotEventDate").value;
+    document.getElementById(
+      "slotEventDate"
+    ).value;
 
-  const startTime =
-    document.getElementById("slotStartTime").value;
 
-  const endTime =
-    document.getElementById("slotEndTime").value;
+  const venueId =
+    document.getElementById(
+      "slotVenue"
+    ).value;
 
-  const capacity =
-    document.getElementById("slotCapacity").value;
-
-  const price =
-    document.getElementById("slotPrice").value;
 
   const linePublishDate =
-  document.getElementById(
-    "slotLinePublishDate"
-  ).value;
+    document.getElementById(
+      "slotLinePublishDate"
+    ).value;
 
-const linePublishTime =
-  document.getElementById(
-    "slotLinePublishTime"
-  ).value;
 
-const webPublishDate =
-  document.getElementById(
-    "slotWebPublishDate"
-  ).value;
+  const linePublishTime =
+    document.getElementById(
+      "slotLinePublishTime"
+    ).value;
 
-const webPublishTime =
-  document.getElementById(
-    "slotWebPublishTime"
-  ).value;
+
+  const webPublishDate =
+    document.getElementById(
+      "slotWebPublishDate"
+    ).value;
+
+
+  const webPublishTime =
+    document.getElementById(
+      "slotWebPublishTime"
+    ).value;
+
+
+  /*
+   * 必須
+   */
+  if (!eventDate) {
+    alert(
+      "開催日を入力してください。"
+    );
+
+    return;
+  }
 
 
   if (!venueId) {
-    alert("会場を選択してください。");
+    alert(
+      "会場を選択してください。"
+    );
+
     return;
   }
 
-  if (!programId) {
-    alert("プログラムを選択してください。");
+
+  /*
+   * 選択されたプログラム取得
+   */
+  const selectedCards =
+    Array.from(
+      document.querySelectorAll(
+        ".slot-program-card"
+      )
+    ).filter(function(card) {
+
+      const checkbox =
+        card.querySelector(
+          ".slot-program-checkbox"
+        );
+
+      return (
+        checkbox &&
+        checkbox.checked
+      );
+
+    });
+
+
+  if (!selectedCards.length) {
+    alert(
+      "プログラムを1つ以上選択してください。"
+    );
+
     return;
   }
 
-  if (!eventDate) {
-    alert("開催日を入力してください。");
-    return;
-  }
 
-  if (!startTime || !endTime) {
-    alert("開催時間を入力してください。");
-    return;
-  }
+  const programs = [];
 
-  if (!capacity) {
-    alert("上限人数を入力してください。");
-    return;
-  }
 
-  if (!price) {
-    alert("料金を入力してください。");
-    return;
+  for (
+    const card of selectedCards
+  ) {
+
+    const programId =
+      card.dataset.programId || "";
+
+
+    const startTime =
+      card.dataset.startTime || "";
+
+
+    const endTime =
+      card.dataset.endTime || "";
+
+
+    const capacity =
+      card.querySelector(
+        ".slot-capacity"
+      ).value;
+
+
+    const price =
+      card.querySelector(
+        ".slot-price"
+      ).value;
+
+
+    const webEnabled =
+      card.querySelector(
+        ".slot-web-enabled"
+      ).checked;
+
+
+    if (
+      !capacity ||
+      Number(capacity) <= 0
+    ) {
+      alert(
+        "上限人数を確認してください。"
+      );
+
+      return;
+    }
+
+
+    if (
+      price === "" ||
+      Number(price) < 0
+    ) {
+      alert(
+        "料金を確認してください。"
+      );
+
+      return;
+    }
+
+
+    programs.push({
+      programId:
+        programId,
+
+      startTime:
+        startTime,
+
+      endTime:
+        endTime,
+
+      capacity:
+        Number(capacity),
+
+      price:
+        Number(price),
+
+      webEnabled:
+        webEnabled
+    });
   }
 
 
@@ -2137,105 +2684,145 @@ const webPublishTime =
       "serviceCreateResult"
     );
 
+
   resultBox.textContent =
     "保存中...";
 
 
   try {
-    const res = await fetch(API_URL, {
-      method: "POST",
 
-      body: new URLSearchParams({
-        action: "createServiceSlot",
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
 
-        adminUserId:
-          currentProfile.userId,
+          body:
+            new URLSearchParams({
 
-        venueId: venueId,
-        programId: programId,
-        eventDate: eventDate,
-        startTime: startTime,
-        endTime: endTime,
-        capacity: capacity,
-        price: price,
+              action:
+                "createServiceSlot",
 
-        linePublishDate:
-  linePublishDate,
+              adminUserId:
+                currentProfile.userId,
 
-linePublishTime:
-  linePublishTime,
+              eventDate:
+                eventDate,
 
-webPublishDate:
-  webPublishDate,
+              venueId:
+                venueId,
 
-webPublishTime:
-  webPublishTime
-      })
-    });
+              programsJson:
+                JSON.stringify(
+                  programs
+                ),
+
+              linePublishDate:
+                linePublishDate,
+
+              linePublishTime:
+                linePublishTime,
+
+              webPublishDate:
+                webPublishDate,
+
+              webPublishTime:
+                webPublishTime
+            })
+        }
+      );
+
 
     const data =
-      await res.json();
+      await response.json();
 
 
     if (!data.ok) {
+
       resultBox.textContent =
         "保存できませんでした：" +
-        (data.message || "");
+        (
+          data.message ||
+          ""
+        );
 
       return;
     }
 
 
     resultBox.textContent =
-      "予約枠を追加しました。";
+      data.createdCount +
+      "件の予約枠を追加しました。";
 
 
     /*
-     * 最新データを取得し直す
+     * 最新データ再取得
      */
     await preloadServiceManagement();
 
+
     /*
-     * 入力欄をリセット
+     * 入力リセット
      */
     document.getElementById(
       "slotEventDate"
     ).value = "";
 
     document.getElementById(
-  "slotLinePublishDate"
-).value = "";
+      "slotVenue"
+    ).value = "";
 
-document.getElementById(
-  "slotLinePublishTime"
-).value = "";
+    document.getElementById(
+      "slotLinePublishDate"
+    ).value = "";
 
-document.getElementById(
-  "slotWebPublishDate"
-).value = "";
+    document.getElementById(
+      "slotLinePublishTime"
+    ).value = "";
 
-document.getElementById(
-  "slotWebPublishTime"
-).value = "";
+    document.getElementById(
+      "slotWebPublishDate"
+    ).value = "";
+
+    document.getElementById(
+      "slotWebPublishTime"
+    ).value = "";
+
+
+    document.getElementById(
+      "slotProgramList"
+    ).innerHTML =
+      '<div class="slot-program-empty">' +
+      '会場を選択してください。' +
+      '</div>';
 
 
     /*
-     * 代表・運営なら
-     * 既存予約枠一覧も更新
+     * 代表・運営のみ
+     * 既存予約枠更新
      */
     const permissions =
       serviceManagementData
-        ? serviceManagementData.permissions || {}
+        ? (
+          serviceManagementData
+            .permissions || {}
+        )
         : {};
 
-    if (permissions.editSchedule) {
+
+    if (
+      permissions.editSchedule
+    ) {
       renderExistingServices();
     }
 
+
   } catch (err) {
+
     resultBox.textContent =
       "通信エラー：" +
       err.message;
+
   }
 }
 
@@ -2265,6 +2852,89 @@ document.getElementById(
   }
 
   return "";
+}
+
+  function handleProgramCheck(
+  checkbox
+) {
+  const card =
+    checkbox.closest(
+      ".slot-program-card"
+    );
+
+  if (!card) {
+    return;
+  }
+
+
+  if (checkbox.checked) {
+    card.classList.add(
+      "selected"
+    );
+  } else {
+    card.classList.remove(
+      "selected"
+    );
+  }
+}
+
+    function isDefaultWebProgram_(
+  programName
+) {
+  const name =
+    String(
+      programName || ""
+    ).trim();
+
+  return [
+    "第1部",
+    "第2部",
+    "両方"
+  ].includes(name);
+}
+
+    function normalizeTimeForInput_(
+  value
+) {
+  if (!value) {
+    return "";
+  }
+
+  const text =
+    String(value).trim();
+
+  const match =
+    text.match(
+      /^(\d{1,2}):(\d{2})/
+    );
+
+  if (match) {
+    return (
+      String(
+        match[1]
+      ).padStart(
+        2,
+        "0"
+      ) +
+      ":" +
+      match[2]
+    );
+  }
+
+  return "";
+}
+
+    function escapeHtml_(value) {
+  return String(
+    value == null
+      ? ""
+      : value
+  )
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
     
   </script>
