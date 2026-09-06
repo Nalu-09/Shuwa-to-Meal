@@ -8,720 +8,562 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #fff;
-      font-family: "Times New Roman", serif;
-      text-align: center;
-      padding: 32px 16px 40px;
-    }
-
-    .wrap {
-      width: min(92vw, 430px);
-      margin: 0 auto;
-    }
-
-    .box {
-      background: #0f0f0f;
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 22px;
-      padding: 30px 22px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-    }
-
-    .title {
-      font-size: 30px;
-      letter-spacing: .12em;
-      margin: 0 0 10px;
-    }
-
-    .subtitle {
-      font-size: 14px;
-      opacity: .72;
-      margin: 0 0 28px;
-      line-height: 1.8;
-    }
-
-    .menu {
-      display: grid;
-      gap: 14px;
-      margin-top: 24px;
-    }
-
-    .menu button,
-    .back-button {
-      width: 100%;
-      background: #fff;
-      color: #000;
-      border: none;
-      border-radius: 999px;
-      padding: 14px 18px;
-      font-size: 15px;
-      font-family: "Times New Roman", serif;
-      cursor: pointer;
-    }
-
-    .menu button:disabled {
-      opacity: .42;
-      cursor: not-allowed;
-    }
-
-    .back-button {
-      background: transparent;
-      color: #fff;
-      border: 1px solid rgba(255,255,255,.18);
-      margin-bottom: 18px;
-    }
-
-    .panel {
-      display: none;
-      text-align: left;
-      margin-top: 26px;
-      padding-top: 22px;
-      border-top: 1px solid rgba(255,255,255,.12);
-      font-size: 14px;
-      line-height: 1.9;
-    }
-
-    .panel.active {
-      display: block;
-    }
-
-    .panel h2 {
-      font-size: 26px;
-      font-weight: normal;
-      margin: 0 0 26px;
-      letter-spacing: .12em;
-      text-align: center;
-    }
-
-    .summary-list {
-      display: grid;
-      gap: 14px;
-      margin-top: 18px;
-    }
-
-    .summary-date {
-      font-size: 22px;
-      letter-spacing: .08em;
-      text-align: center;
-      margin: 34px 0 12px;
-      opacity: .95;
-    }
-
-    .summary-card,
-    .reservation-card {
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 18px;
-      padding: 18px 16px;
-      background: rgba(255,255,255,.03);
-      font-size: 15px;
-      line-height: 1.9;
-    }
-
-    .summary-card{
-  cursor:default;
-}
-
-.summary-card-clickable{
-  cursor:pointer;
-}
-
-    .summary-card:active {
-      transform: scale(.99);
-    }
-
-    .service-name,
-    .reservation-card .name {
-      font-size: 20px;
-      margin-bottom: 10px;
-      letter-spacing: .04em;
-    }
-
-    .detail-header {
-      text-align: center;
-      margin-bottom: 18px;
-      line-height: 2;
-      opacity: .9;
-    }
-
-    .small {
-      opacity: .72;
-      font-size: 13px;
-    }
-
-    .status {
-      white-space: pre-line;
-      text-align: center;
-      opacity: .86;
-      padding: 20px 0;
-    }
-
-    .checkin-button{
-  width:100%;
-  margin-top:14px;
-  padding:12px 16px;
-  border:none;
-  border-radius:999px;
-  background:#fff;
-  color:#000;
-  font-size:14px;
-  font-family:"Times New Roman", serif;
-  cursor:pointer;
-}
-
-.checkin-button:disabled{
-  opacity:.45;
-  cursor:not-allowed;
-}
-
-.checked-in-label{
-  margin-top:14px;
-  padding:11px 14px;
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:999px;
-  text-align:center;
-  font-size:14px;
-  opacity:.8;
-}
-
-.checkin-result{
-  margin-top:10px;
-  font-size:12px;
-  text-align:center;
-  opacity:.75;
-}
-    .receipt-area {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255,255,255,.1);
-}
-
-.receipt-button {
-  width: 100%;
-  margin-top: 10px;
-  padding: 12px 16px;
-  border: 1px solid rgba(255,255,255,.22);
-  border-radius: 999px;
-  background: transparent;
-  color: #fff;
-  font-size: 14px;
-  font-family: "Times New Roman", serif;
-  cursor: pointer;
-}
-
-.receipt-button--primary {
-  background: #fff;
-  color: #000;
-  border: none;
-}
-
-.receipt-button:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-}
-
-.receipt-info {
-  margin-top: 10px;
-  font-size: 12px;
-  text-align: center;
-  opacity: .78;
-  line-height: 1.7;
-}
-
-.qr-box {
-  margin-top: 14px;
-  padding: 16px;
-  border-radius: 16px;
-  background: rgba(255,255,255,.04);
-  text-align: center;
-}
-
-.qr-box img {
-  width: 180px;
-  height: 180px;
-  background: #fff;
-  padding: 10px;
-  border-radius: 12px;
-}
-
-.qr-box a {
-  display: block;
-  margin-top: 12px;
-  color: #fff;
-  font-size: 13px;
-  text-decoration: underline;
-}
-
-    .service-management-section{
-  margin-top:24px;
-  padding:20px 16px;
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:18px;
-  background:rgba(255,255,255,.03);
-}
-
-.service-management-title{
-  font-size:20px;
-  margin-bottom:20px;
-  letter-spacing:.06em;
-}
-
-.form-label{
-  display:block;
-  margin-top:16px;
-  margin-bottom:6px;
-  font-size:13px;
-  opacity:.75;
-}
-
-.service-management-section input,
-.service-management-section select{
-  width:100%;
-  box-sizing:border-box;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,.16);
-  background:#161616;
-  color:#fff;
-  font-size:15px;
-}
-
-.service-save-button{
-  width:100%;
-  margin-top:24px;
-  padding:14px;
-  border:none;
-  border-radius:999px;
-  background:#fff;
-  color:#000;
-  font-size:15px;
-  cursor:pointer;
-}
-
-.service-slot-card{
-  margin-top:12px;
-  padding:16px;
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:14px;
-  line-height:1.8;
-}
-
-.service-slot-card .slot-name{
-  font-size:17px;
-  margin-bottom:6px;
-}
-
-    .service-form-control,
-#serviceManagement input,
-#serviceManagement select {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-.publish-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  width: 100%;
-  min-width: 0;
-}
-
-.publish-row > * {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.optional-label {
-  font-size: 12px;
-  font-weight: 400;
-  opacity: 0.65;
-  margin-left: 4px;
-}
-
-.publish-note {
-  margin-top: 6px;
-  font-size: 12px;
-  line-height: 1.6;
-  opacity: 0.65;
-}
-
-    #serviceManagement,
-#serviceManagement * {
-  box-sizing: border-box;
-}
-
-#serviceManagement input,
-#serviceManagement select,
-#serviceManagement textarea {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-#serviceManagement input[type="date"],
-#serviceManagement input[type="time"],
-#serviceManagement input[type="number"] {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-.publish-row {
-  display: grid;
-  grid-template-columns:
-    minmax(0, 1fr)
-    minmax(0, 1fr);
-  gap: 10px;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.publish-row > * {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
-@media (max-width: 600px) {
-  .publish-row {
-    grid-template-columns: 1fr;
+   <style>
+  body {
+    margin: 0;
+    background: #E8EFE9;
+    color: #2A332F;
+    font-family: "Times New Roman", serif;
+    text-align: center;
+    padding: 32px 16px 40px;
   }
 
-  #serviceManagement input,
-  #serviceManagement select,
-  #serviceManagement textarea {
+  .wrap {
+    width: min(92vw, 430px);
+    margin: 0 auto;
+  }
+
+  .box {
+    background: #F7F5F0;
+    border: 1px solid rgba(82, 98, 89, .12);
+    border-radius: 22px;
+    padding: 30px 22px;
+    box-shadow: 0 12px 32px rgba(44, 58, 50, .10);
+  }
+
+  .title {
+    font-size: 30px;
+    letter-spacing: .12em;
+    margin: 0 0 10px;
+    color: #2D3833;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    opacity: .78;
+    margin: 0 0 28px;
+    line-height: 1.8;
+    color: #4C5852;
+  }
+
+  .menu {
+    display: grid;
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .menu button,
+  .back-button {
+    width: 100%;
+    background: #3A4E45;
+    color: #F7F5F0;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 18px;
+    font-size: 15px;
+    font-family: "Times New Roman", serif;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(58, 78, 69, .14);
+  }
+
+  .menu button:disabled {
+    opacity: .42;
+    cursor: not-allowed;
+  }
+
+  .back-button {
+    background: transparent;
+    color: #3A4E45;
+    border: 1px solid rgba(58, 78, 69, .28);
+    margin-bottom: 18px;
+    box-shadow: none;
+  }
+
+  .panel {
+    display: none;
+    text-align: left;
+    margin-top: 26px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(82, 98, 89, .16);
+    font-size: 14px;
+    line-height: 1.9;
+    color: #2D3833;
+  }
+
+  .panel.active {
+    display: block;
+  }
+
+  .panel h2 {
+    font-size: 26px;
+    font-weight: normal;
+    margin: 0 0 26px;
+    letter-spacing: .12em;
+    text-align: center;
+    color: #2D3833;
+  }
+
+  .summary-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 18px;
+  }
+
+  .summary-date {
+    font-size: 22px;
+    letter-spacing: .08em;
+    text-align: center;
+    margin: 34px 0 12px;
+    opacity: .95;
+    color: #334039;
+  }
+
+  .summary-card,
+  .reservation-card {
+    border: 1px solid rgba(82, 98, 89, .14);
+    border-radius: 18px;
+    padding: 18px 16px;
+    background: #FCFBF8;
+    font-size: 15px;
+    line-height: 1.9;
+    color: #2A332F;
+    box-shadow: 0 8px 20px rgba(44, 58, 50, .06);
+  }
+
+  .summary-card {
+    cursor: pointer;
+  }
+
+  .summary-card:active {
+    transform: scale(.99);
+  }
+
+  .service-name,
+  .reservation-card .name {
+    font-size: 20px;
+    margin-bottom: 10px;
+    letter-spacing: .04em;
+    color: #2F3C36;
+  }
+
+  .detail-header {
+    text-align: center;
+    margin-bottom: 18px;
+    line-height: 2;
+    opacity: .92;
+    color: #46534D;
+  }
+
+  .small {
+    opacity: .72;
+    font-size: 13px;
+    color: #5A6761;
+  }
+
+  .status {
+    white-space: pre-line;
+    text-align: center;
+    opacity: .86;
+    padding: 20px 0;
+    color: #49564F;
+  }
+
+  .checkin-button {
+    width: 100%;
+    margin-top: 14px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 999px;
+    background: #3A4E45;
+    color: #F7F5F0;
+    font-size: 14px;
+    font-family: "Times New Roman", serif;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(58, 78, 69, .14);
+  }
+
+  .checkin-button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+  }
+
+  .checked-in-label {
+    margin-top: 14px;
+    padding: 11px 14px;
+    border: 1px solid rgba(58, 78, 69, .18);
+    border-radius: 999px;
+    text-align: center;
+    font-size: 14px;
+    opacity: .88;
+    background: #F3F6F2;
+    color: #334039;
+  }
+
+  .checkin-result {
+    margin-top: 10px;
+    font-size: 12px;
+    text-align: center;
+    opacity: .75;
+    color: #5A6761;
+  }
+
+  .receipt-area {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(82, 98, 89, .10);
+  }
+
+  .receipt-button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px 16px;
+    border: 1px solid rgba(58, 78, 69, .22);
+    border-radius: 999px;
+    background: transparent;
+    color: #3A4E45;
+    font-size: 14px;
+    font-family: "Times New Roman", serif;
+    cursor: pointer;
+  }
+
+  .receipt-button--primary {
+    background: #3A4E45;
+    color: #F7F5F0;
+    border: none;
+  }
+
+  .receipt-button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+  }
+
+  .receipt-info {
+    margin-top: 10px;
+    font-size: 12px;
+    text-align: center;
+    opacity: .78;
+    line-height: 1.7;
+    color: #5A6761;
+  }
+
+  .qr-box {
+    margin-top: 14px;
+    padding: 16px;
+    border-radius: 16px;
+    background: #F3F6F2;
+    text-align: center;
+    border: 1px solid rgba(82, 98, 89, .10);
+  }
+
+  .qr-box img {
+    width: 180px;
+    height: 180px;
+    background: #fff;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .qr-box a {
+    display: block;
+    margin-top: 12px;
+    color: #3A4E45;
+    font-size: 13px;
+    text-decoration: underline;
+  }
+
+  /* =========================
+     予約枠管理
+  ========================= */
+
+  #serviceManagement,
+  #serviceManagement * {
+    box-sizing: border-box;
+  }
+
+  #serviceManagement {
     width: 100%;
     max-width: 100%;
     min-width: 0;
   }
-}
-
-    /* =========================
-   予約枠管理
-========================= */
-
-#serviceManagement,
-#serviceManagement * {
-  box-sizing: border-box;
-}
-
-#serviceManagement {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.service-management-section {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-
-  padding: 18px;
-  margin-bottom: 18px;
-
-  border: 1px solid rgba(0,0,0,0.10);
-  border-radius: 14px;
-
-  background: #fff;
-}
-
-.service-management-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 20px;
-}
-
-.form-label {
-  display: block;
-
-  margin-top: 18px;
-  margin-bottom: 7px;
-
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.service-form-control,
-#serviceManagement input,
-#serviceManagement select,
-#serviceManagement textarea {
-  display: block;
-
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-
-  padding: 12px;
-
-  border: 1px solid rgba(0,0,0,0.18);
-  border-radius: 10px;
-
-  background: #fff;
-
-  font-size: 16px;
-
-  box-sizing: border-box;
-}
-
-#serviceManagement input[type="date"],
-#serviceManagement input[type="time"],
-#serviceManagement input[type="number"] {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-
-  box-sizing: border-box;
-}
-
-
-/* =========================
-   プログラム一覧
-========================= */
-
-.slot-program-list {
-  width: 100%;
-  min-width: 0;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 10px;
-}
-
-.slot-program-empty {
-  padding: 14px;
-
-  border: 1px dashed rgba(0,0,0,0.18);
-  border-radius: 10px;
-
-  font-size: 13px;
-  opacity: 0.6;
-}
-
-
-/* 各プログラム */
-.slot-program-card {
-  width: 100%;
-  min-width: 0;
-
-  padding: 14px;
-
-  border: 1px solid rgba(0,0,0,0.12);
-  border-radius: 12px;
-
-  background: #fff;
-}
-
-
-/* 上部 */
-.slot-program-main {
-  display: flex;
-  align-items: flex-start;
-
-  gap: 10px;
-}
-
-.slot-program-checkbox {
-  width: auto !important;
-  min-width: auto !important;
-
-  margin-top: 3px;
-}
-
-.slot-program-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.slot-program-name {
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.slot-program-time {
-  margin-top: 3px;
-
-  font-size: 13px;
-  opacity: 0.65;
-}
-
-
-/* 選択後の設定欄 */
-.slot-program-settings {
-  display: none;
-
-  margin-top: 14px;
-  padding-top: 14px;
-
-  border-top: 1px solid rgba(0,0,0,0.08);
-}
-
-.slot-program-card.selected
-.slot-program-settings {
-  display: block;
-}
-
-
-/* 定員・料金 */
-.slot-program-setting-grid {
-  display: grid;
-
-  grid-template-columns:
-    minmax(0, 1fr)
-    minmax(0, 1fr);
-
-  gap: 10px;
-}
-
-.slot-small-label {
-  display: block;
-
-  margin-bottom: 5px;
-
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-
-/* Web公開 */
-.slot-web-setting {
-  margin-top: 12px;
-}
-
-.slot-web-checkbox-row {
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  font-size: 13px;
-}
-
-.slot-web-checkbox-row input {
-  width: auto !important;
-  min-width: auto !important;
-}
-
-
-/* =========================
-   公開日時
-========================= */
-
-.publish-row {
-  display: grid;
-
-  grid-template-columns:
-    minmax(0, 1fr)
-    minmax(0, 1fr);
-
-  gap: 10px;
-
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.publish-row > * {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-
-  box-sizing: border-box;
-}
-
-.optional-label {
-  margin-left: 4px;
-
-  font-size: 12px;
-  font-weight: 400;
-
-  opacity: 0.6;
-}
-
-.publish-note {
-  margin-top: 6px;
-
-  font-size: 12px;
-  line-height: 1.6;
-
-  opacity: 0.62;
-}
-
-
-/* =========================
-   保存ボタン
-========================= */
-
-.service-save-button {
-  display: block;
-
-  width: 100%;
-
-  margin-top: 22px;
-  padding: 14px;
-
-  border: 0;
-  border-radius: 10px;
-
-  font-size: 15px;
-  font-weight: 600;
-
-  cursor: pointer;
-}
-
-.service-create-result {
-  min-height: 20px;
-
-  margin-top: 16px;
-
-  font-size: 13px;
-}
-
-
-/* =========================
-   スマートフォン
-========================= */
-
-@media (max-width: 600px) {
 
   .service-management-section {
-    padding: 14px;
-  }
-
-  .publish-row {
-    grid-template-columns: 1fr;
-  }
-
-  .slot-program-setting-grid {
-    grid-template-columns: 1fr;
-  }
-
-  #serviceManagement input,
-  #serviceManagement select,
-  #serviceManagement textarea {
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    margin-top: 20px;
+    margin-bottom: 18px;
+    padding: 18px 16px;
+    border: 1px solid rgba(82, 98, 89, .14);
+    border-radius: 18px;
+    background: #FCFBF8;
+    color: #2A332F;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(44, 58, 50, .05);
+  }
+
+  .service-management-title {
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: normal;
+    letter-spacing: .06em;
+    color: #334039;
+  }
+
+  .form-label {
+    display: block;
+    margin-top: 18px;
+    margin-bottom: 7px;
+    font-size: 13px;
+    opacity: .78;
+    color: #4B5751;
+  }
+
+  .service-form-control,
+  #serviceManagement input[type="date"],
+  #serviceManagement input[type="time"],
+  #serviceManagement input[type="number"],
+  #serviceManagement select,
+  #serviceManagement textarea {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 46px;
+    padding: 10px 12px;
+    border: 1px solid rgba(82, 98, 89, .16);
+    border-radius: 10px;
+    background: #F7F5F0;
+    color: #2A332F;
+    font-size: 15px;
+    font-family: "Times New Roman", serif;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
   }
 
   #serviceManagement input[type="date"],
-  #serviceManagement input[type="time"],
-  #serviceManagement input[type="number"] {
+  #serviceManagement input[type="time"] {
+    min-inline-size: 0;
+    inline-size: 100%;
+  }
+
+  .slot-program-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .slot-program-empty {
+    width: 100%;
+    padding: 14px;
+    border: 1px dashed rgba(82, 98, 89, .18);
+    border-radius: 10px;
+    font-size: 13px;
+    opacity: .7;
+    color: #5A6761;
+    background: #F7F5F0;
+  }
+
+  .slot-program-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid rgba(82, 98, 89, .14);
+    border-radius: 14px;
+    background: #F8F7F3;
+    color: #2A332F;
+    overflow: hidden;
+  }
+
+  .slot-program-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .slot-program-checkbox {
+    display: block !important;
+    flex: 0 0 auto;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    margin: 1px 0 0;
+    padding: 0 !important;
+    appearance: auto !important;
+    -webkit-appearance: checkbox !important;
+  }
+
+  .slot-program-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .slot-program-name {
+    font-size: 16px;
+    letter-spacing: .03em;
+    color: #324039;
+  }
+
+  .slot-program-time {
+    margin-top: 3px;
+    font-size: 13px;
+    opacity: .72;
+    color: #5A6761;
+  }
+
+  .slot-program-settings {
+    display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(82, 98, 89, .10);
+  }
+
+  .slot-program-card.selected .slot-program-settings {
+    display: block;
+  }
+
+  .slot-program-setting-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .slot-small-label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    opacity: .7;
+    color: #5A6761;
+  }
+
+  .slot-web-setting {
+    margin-top: 14px;
+  }
+
+  .slot-web-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #46534D;
+  }
+
+  .slot-web-checkbox-row input {
+    display: block !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    margin: 0;
+    padding: 0 !important;
+    appearance: auto !important;
+    -webkit-appearance: checkbox !important;
+  }
+
+  .publish-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
     width: 100%;
     max-width: 100%;
     min-width: 0;
   }
-}
+
+  .publish-row > * {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .optional-label {
+    margin-left: 4px;
+    font-size: 12px;
+    opacity: .65;
+    color: #5A6761;
+  }
+
+  .publish-note {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.6;
+    opacity: .72;
+    color: #5A6761;
+  }
+
+  .service-save-button {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 999px;
+    background: #3A4E45;
+    color: #F7F5F0;
+    font-size: 15px;
+    font-family: "Times New Roman", serif;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(58, 78, 69, .14);
+  }
+
+  .service-create-result {
+    min-height: 20px;
+    margin-top: 16px;
+    font-size: 13px;
+    text-align: center;
+    opacity: .8;
+    color: #5A6761;
+  }
+
+  .service-slot-card {
+    width: 100%;
+    margin-top: 12px;
+    padding: 16px;
+    border: 1px solid rgba(82, 98, 89, .12);
+    border-radius: 14px;
+    line-height: 1.8;
+    background: #F8F7F3;
+    color: #2A332F;
+  }
+
+  .service-slot-card .slot-name {
+    font-size: 17px;
+    margin-bottom: 6px;
+    color: #334039;
+  }
+
+  @media (max-width: 600px) {
+    .service-management-section {
+      padding: 14px 12px;
+    }
+
+    .publish-row {
+      grid-template-columns: 1fr;
+    }
+
+    .slot-program-setting-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .service-form-control,
+    #serviceManagement input[type="date"],
+    #serviceManagement input[type="time"],
+    #serviceManagement input[type="number"],
+    #serviceManagement select,
+    #serviceManagement textarea {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      inline-size: 100% !important;
+      min-inline-size: 0 !important;
+      max-inline-size: 100% !important;
+    }
+  }
+</style>
     
   </style>
 </head>
