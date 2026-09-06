@@ -312,6 +312,44 @@
   font-size:17px;
   margin-bottom:6px;
 }
+
+    .service-form-control,
+#serviceManagement input,
+#serviceManagement select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.publish-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.publish-row > * {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.optional-label {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.65;
+  margin-left: 4px;
+}
+
+.publish-note {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+  opacity: 0.65;
+}
     
   </style>
 </head>
@@ -381,6 +419,7 @@
       <input
         id="slotEventDate"
         type="date"
+        class="service-form-control"
       >
 
       <label class="form-label">
@@ -389,6 +428,7 @@
       <input
         id="slotStartTime"
         type="time"
+        class="service-form-control"
       >
 
       <label class="form-label">
@@ -397,6 +437,7 @@
       <input
         id="slotEndTime"
         type="time"
+        class="service-form-control"
       >
 
       <label class="form-label">
@@ -406,6 +447,7 @@
         id="slotCapacity"
         type="number"
         min="1"
+        class="service-form-control"
       >
 
       <label class="form-label">
@@ -415,23 +457,53 @@
         id="slotPrice"
         type="number"
         min="0"
+        class="service-form-control"
       >
 
       <label class="form-label">
-        LINE先行公開日時
-      </label>
-      <input
-        id="slotLinePublicAt"
-        type="datetime-local"
-      >
+  LINE先行公開
+</label>
+
+<div class="publish-row">
+  <input
+    type="date"
+    id="slotLinePublishDate"
+    class="service-form-control"
+  >
+
+  <input
+    type="time"
+    id="slotLinePublishTime"
+    class="service-form-control"
+  >
+</div>
+      <div class="publish-note">
+  時間が空欄の場合は、指定した日の0:00から公開されます。
+</div>
 
       <label class="form-label">
-        Web一般公開日時
-      </label>
-      <input
-        id="slotWebPublicAt"
-        type="datetime-local"
-      >
+  Web一般公開
+  <span class="optional-label">※任意</span>
+</label>
+
+<div class="publish-row">
+  <input
+    type="date"
+    id="slotWebPublishDate"
+    class="service-form-control"
+  >
+
+  <input
+    type="time"
+    id="slotWebPublishTime"
+    class="service-form-control"
+  >
+</div>
+
+<div class="publish-note">
+  公開日が空欄の場合はWebでは公開されません。<br>
+  時間が空欄の場合は、指定した日の0:00から公開されます。
+</div>
 
       <button
         class="service-save-button"
@@ -1956,11 +2028,25 @@ if (permissions.editSchedule) {
   const price =
     document.getElementById("slotPrice").value;
 
-  const linePublishAt =
-    document.getElementById("slotLinePublicAt").value;
+  const linePublishDate =
+  document.getElementById(
+    "slotLinePublishDate"
+  ).value;
 
-  const webPublishAt =
-    document.getElementById("slotWebPublicAt").value;
+const linePublishTime =
+  document.getElementById(
+    "slotLinePublishTime"
+  ).value;
+
+const webPublishDate =
+  document.getElementById(
+    "slotWebPublishDate"
+  ).value;
+
+const webPublishTime =
+  document.getElementById(
+    "slotWebPublishTime"
+  ).value;
 
 
   if (!venueId) {
@@ -2021,11 +2107,17 @@ if (permissions.editSchedule) {
         capacity: capacity,
         price: price,
 
-        linePublishAt:
-          linePublishAt,
+        linePublishDate:
+  linePublishDate,
 
-        webPublishAt:
-          webPublishAt
+linePublishTime:
+  linePublishTime,
+
+webPublishDate:
+  webPublishDate,
+
+webPublishTime:
+  webPublishTime
       })
     });
 
@@ -2059,12 +2151,20 @@ if (permissions.editSchedule) {
     ).value = "";
 
     document.getElementById(
-      "slotLinePublicAt"
-    ).value = "";
+  "slotLinePublishDate"
+).value = "";
 
-    document.getElementById(
-      "slotWebPublicAt"
-    ).value = "";
+document.getElementById(
+  "slotLinePublishTime"
+).value = "";
+
+document.getElementById(
+  "slotWebPublishDate"
+).value = "";
+
+document.getElementById(
+  "slotWebPublishTime"
+).value = "";
 
 
     /*
