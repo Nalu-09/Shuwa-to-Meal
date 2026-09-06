@@ -319,27 +319,27 @@
   }
 
   .service-form-control,
-  #serviceManagement input[type="date"],
-  #serviceManagement input[type="time"],
-  #serviceManagement input[type="number"],
-  #serviceManagement select,
-  #serviceManagement textarea {
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    height: 46px;
-    padding: 10px 12px;
-    border: 1px solid rgba(82, 98, 89, .16);
-    border-radius: 10px;
-    background: #F7F5F0;
-    color: #2A332F;
-    font-size: 15px;
-    font-family: "Times New Roman", serif;
-    box-sizing: border-box;
-    appearance: none;
-    -webkit-appearance: none;
-  }
+#serviceManagement input:not([type="checkbox"]),
+#serviceManagement select,
+#serviceManagement textarea {
+  display: block;
+
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  padding: 12px;
+
+  border: 1px solid rgba(82, 98, 89, .16);
+  border-radius: 10px;
+
+  background: #F7F5F0;
+  color: #2A332F;
+
+  font-size: 16px;
+
+  box-sizing: border-box;
+}
 
   #serviceManagement input[type="date"],
   #serviceManagement input[type="time"] {
@@ -385,17 +385,24 @@
   }
 
   .slot-program-checkbox {
-    display: block !important;
-    flex: 0 0 auto;
-    width: 20px !important;
-    height: 20px !important;
-    min-width: 20px !important;
-    max-width: 20px !important;
-    margin: 1px 0 0;
-    padding: 0 !important;
-    appearance: auto !important;
-    -webkit-appearance: checkbox !important;
-  }
+  display: inline-block !important;
+
+  width: 20px !important;
+  height: 20px !important;
+
+  min-width: 20px !important;
+  max-width: 20px !important;
+
+  margin: 2px 0 0 0 !important;
+  padding: 0 !important;
+
+  flex: 0 0 20px;
+
+  appearance: checkbox !important;
+  -webkit-appearance: checkbox !important;
+
+  cursor: pointer;
+}
 
   .slot-program-info {
     flex: 1;
@@ -454,17 +461,23 @@
     color: #46534D;
   }
 
-  .slot-web-checkbox-row input {
-    display: block !important;
-    width: 18px !important;
-    height: 18px !important;
-    min-width: 18px !important;
-    max-width: 18px !important;
-    margin: 0;
-    padding: 0 !important;
-    appearance: auto !important;
-    -webkit-appearance: checkbox !important;
-  }
+  .slot-web-checkbox-row input[type="checkbox"] {
+  display: inline-block !important;
+
+  width: 18px !important;
+  height: 18px !important;
+
+  min-width: 18px !important;
+  max-width: 18px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  appearance: checkbox !important;
+  -webkit-appearance: checkbox !important;
+
+  cursor: pointer;
+}
 
   .publish-row {
     display: grid;
