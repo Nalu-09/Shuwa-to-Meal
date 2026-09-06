@@ -538,22 +538,20 @@ await preloadServiceManagement();
      */
     if (!data.ok) {
   button.style.display = "none";
-
-  const pageStatus =
-    document.getElementById("pageStatus");
-
-  pageStatus.textContent =
-    "予約枠管理を取得できませんでした：" +
-    (data.message || "");
-
   return;
 }
 
-    serviceManagementData =
-      data;
+const permissions =
+  data.permissions || {};
 
-    button.style.display =
-      "block";
+if (!permissions.createSchedule) {
+  button.style.display = "none";
+  serviceManagementData = null;
+  return;
+}
+
+serviceManagementData = data;
+button.style.display = "block";
 
   } catch (err) {
   button.style.display = "none";
