@@ -537,11 +537,17 @@ await preloadServiceManagement();
      * → ボタン自体を表示しない
      */
     if (!data.ok) {
-      button.style.display =
-        "none";
+  button.style.display = "none";
 
-      return;
-    }
+  const pageStatus =
+    document.getElementById("pageStatus");
+
+  pageStatus.textContent =
+    "予約枠管理を取得できませんでした：" +
+    (data.message || "");
+
+  return;
+}
 
     serviceManagementData =
       data;
@@ -550,9 +556,15 @@ await preloadServiceManagement();
       "block";
 
   } catch (err) {
-    button.style.display =
-      "none";
-  }
+  button.style.display = "none";
+
+  const pageStatus =
+    document.getElementById("pageStatus");
+
+  pageStatus.textContent =
+    "予約枠管理エラー：" +
+    err.message;
+}
 }
 
     function showPanel(id) {
