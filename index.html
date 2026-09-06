@@ -760,13 +760,19 @@
 
     <div
   id="serviceManagement"
-  style="display:none;"
+  class="panel"
 >
 
+  <h2>Schedule</h2>
+
+
+  <!-- =========================
+       新規予約枠
+  ========================== -->
   <div class="service-management-section">
 
     <div class="service-management-title">
-      予約枠管理
+      新規予約枠
     </div>
 
 
@@ -835,7 +841,7 @@
     </div>
 
     <div class="publish-note">
-      時間が空欄の場合は、指定した日の0:00から公開されます。
+      公開時間が空欄の場合は、指定日の0:00から公開されます。
     </div>
 
 
@@ -865,18 +871,16 @@
 
     <div class="publish-note">
       公開日が空欄の場合はWebでは公開されません。<br>
-      時間が空欄の場合は、指定した日の0:00から公開されます。
+      公開時間が空欄の場合は、指定日の0:00から公開されます。
     </div>
 
 
-    <!-- 保存結果 -->
     <div
       id="serviceCreateResult"
       class="service-create-result"
     ></div>
 
 
-    <!-- 保存 -->
     <button
       type="button"
       class="service-save-button"
@@ -888,10 +892,14 @@
   </div>
 
 
-  <!-- 既存予約枠 -->
+  <!-- =========================
+       既存予約枠
+       代表・運営のみ表示
+  ========================== -->
   <div
     id="existingServiceSection"
     class="service-management-section"
+    style="display:none;"
   >
 
     <div class="service-management-title">
@@ -2152,46 +2160,91 @@ function showReceiptQr(
 }
 
     function openServiceManagement() {
-  showPanel(
-    "serviceManagement"
-  );
+  /*
+   * 予約管理を非表示
+   */
+  const reservationPanel =
+    document.getElementById(
+      "reservation"
+    );
+
+  if (reservationPanel) {
+    reservationPanel.classList.remove(
+      "active"
+    );
+  }
+
+
+  /*
+   * 予約枠管理を表示
+   */
+  const serviceManagement =
+    document.getElementById(
+      "serviceManagement"
+    );
+
+  if (!serviceManagement) {
+    return;
+  }
+
+  serviceManagement.style.display =
+    "block";
+
 
   if (!serviceManagementData) {
     return;
   }
 
-  const status =
-    document.getElementById(
-      "serviceManagementStatus"
-    );
 
-  const content =
-    document.getElementById(
-      "serviceManagementContent"
-    );
-
-  status.style.display =
-    "none";
-
-  content.style.display =
-    "block";
-
+  /*
+   * 会場一覧をセット
+   */
   setupVenueSelect();
 
-const permissions =
-  serviceManagementData.permissions || {};
 
-const existingSection =
-  document.getElementById(
-    "existingServiceSection"
-  );
+  /*
+   * 権限
+   */
+  const permissions =
+    serviceManagementData
+      .permissions || {};
 
-if (permissions.editSchedule) {
-  existingSection.style.display = "block";
-  renderExistingServices();
-} else {
-  existingSection.style.display = "none";
-}
+
+  /*
+   * 既存予約枠
+   *
+   * 代表・運営のみ表示
+   */
+  const existingSection =
+    document.getElementById(
+      "existingServiceSection"
+    );
+
+  if (existingSection) {
+
+    if (permissions.editSchedule) {
+      existingSection.style.display =
+        "block";
+
+      const existingList =
+        document.getElementById(
+          "existingServiceList"
+        );
+
+      if (existingList) {
+        existingList.innerHTML =
+          '<div class="slot-program-empty">' +
+          '既存予約枠の編集機能はこの後接続します。' +
+          '</div>';
+      }
+
+    } else {
+
+      existingSection.style.display =
+        "none";
+
+    }
+  }
 }
 
     function setupVenueSelect() {
