@@ -538,6 +538,19 @@ await preloadServiceManagement();
      */
     if (!data.ok) {
   button.style.display = "none";
+  serviceManagementData = null;
+
+  if (data.message === "permission_denied") {
+    return;
+  }
+
+  const pageStatus =
+    document.getElementById("pageStatus");
+
+  pageStatus.textContent =
+    "予約枠管理を取得できませんでした：" +
+    (data.message || "");
+
   return;
 }
 
