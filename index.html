@@ -412,25 +412,187 @@ renderProgramSummaries(
   date,
   program
 ) {
+  const groups =
+    window.reservationGroups || [];
+
+  return groups.findIndex(
+    function(group) {
+      return (
+        group.date === date &&
+        group.program === program
+      );
+    }
+  );
+}
+
+    function renderProgramSummaries(
+  summaries,
+  canViewDetails
+) {
+  const list =
+    document.getElementById("reservationList");
+
+  list.className = "";
+
+  window.currentProgramSummaries =
+    summaries;
+
+  window.currentCanViewDetails =
+    canViewDetails;
+
+  /*
+   * 運営補助以上の詳細表示用グループを先に作る
+   */
+  if (canViewDetails) {
+    buildReservationGroups();
+  }
+
+  const groupedByDate = {};
+
+  summaries.forEach(function(item) {
+    const date =
+      item.date || "日程未設定";
+
+    if (!groupedByDate[date]) {
+      groupedByDate[date] = [];
+    }
+
+    groupedByDate[date].push(item);
+  });
+
+  const dates =
+    Object.keys(groupedByDate).sort();
+
+  let html =
+    `<div class="summary-list">`;
+
+  dates.forEach(function(date) {
+    html += `
+      <div class="summary-date">
+        ${escapeHtml(date)}
+      </div>
+    `;
+
+    const programs =
+      groupedByDate[date];
+
+    programs.sort(function(a, b) {
+      return (
+        programOrder(a.program) -
+        programOrder(b.program)
+      );
+    });
+
+    programs.forEach(function(item) {
+      const program =
+        item.program || "参加部未設定";
+
+      const people =
+        Number(item.people || 0);
+
+      const allergies =
+        Array.isArray(item.allergies)
+          ? item.allergies
+          : [];
+
+      let allergyHtml = "";
+
+      if (allergies.length === 0) {
+        allergyHtml = `
+          <div class="small">
+            嗜好NG：なし
+          </div>
+        `;
+      } else {
+        allergyHtml = `
+          <div class="small">
+            嗜好NG
+          </div>
+        `;
+
+        allergies.forEach(function(value) {
+          allergyHtml += `
+            <div>
+              ${escapeHtml(value)}
+            </div>
+          `;
+        });
+      }
+
+      if (canViewDetails) {
+        const index =
+          findReservationGroupIndex(
+            date,
+            program
+          );
+
+        html += `
+          <div
+            class="summary-card summary-card-clickable"
+            onclick="renderDetail(${index})"
+          >
+            <div class="service-name">
+              ${escapeHtml(program)}
+            </div>
+
+            <div>
+              参加人数：${people}名
+            </div>
+
+            ${allergyHtml}
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="summary-card">
+            <div class="service-name">
+              ${escapeHtml(program)}
+            </div>
+
+            <div>
+              参加人数：${people}名
+            </div>
+
+            ${allergyHtml}
+          </div>
+        `;
+      }
+    });
+  });
+
+  html += `</div>`;
+
+  list.innerHTML = html;
+}
+
+    function buildReservationGroups() {
   const grouped = {};
 
   allReservations.forEach(function(r) {
+    const date =
+      r.date || "日程未設定";
+
+    const program =
+      r.program || "参加部未設定";
+
     const key =
-      (r.date || "") +
-      "___" +
-      (r.program || "");
+      date + "___" + program;
 
     if (!grouped[key]) {
       grouped[key] = {
-        date: r.date || "",
-        program: r.program || "",
-        reservations: []
+        date: date,
+        program: program,
+        reservations: [],
+        totalPeople: 0
       };
     }
 
     grouped[key]
       .reservations
       .push(r);
+
+    grouped[key].totalPeople +=
+      Number(r.people || 1);
   });
 
   const groups =
@@ -438,9 +600,7 @@ renderProgramSummaries(
 
   groups.sort(function(a, b) {
     if (a.date !== b.date) {
-      return a.date.localeCompare(
-        b.date
-      );
+      return a.date.localeCompare(b.date);
     }
 
     return (
@@ -451,15 +611,6 @@ renderProgramSummaries(
 
   window.reservationGroups =
     groups;
-
-  return groups.findIndex(
-    function(group) {
-      return (
-        group.date === date &&
-        group.program === program
-      );
-    }
-  );
 }
 
     function renderSummary(reservations) {
@@ -1130,7 +1281,6 @@ scrollToReservationCard(groupIndex, reservationIndex);
 }
     
     function backToSummary() {
-      function backToSummary() {
   renderProgramSummaries(
     window.currentProgramSummaries || [],
     Boolean(window.currentCanViewDetails)
