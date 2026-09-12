@@ -467,66 +467,36 @@ async function start() {
     }
 
     function renderProgramOptions(eventDate) {
-  selectedEvent = reservationOptions.find(function(option) {
-    return option.eventDate === eventDate;
-  });
-
-  programListEl.innerHTML = "";
-
   if (
-    !selectedEvent ||
-    !Array.isArray(selectedEvent.services)
-  ) {
-    return;
-  }
+  service.reservationStarted ===
+    false &&
+  service.reservationStartText
+) {
 
-  selectedEvent.services.forEach(function(service) {
-    const disabled = !service.available;
+  option.textContent =
+    service.serviceName +
+    "｜" +
+    service.reservationStartText +
+    "より申込開始";
 
-    const timeText =
-      service.startTime || service.endTime
-        ? escapeHtml(service.startTime || "") +
-          " - " +
-          escapeHtml(service.endTime || "")
-        : "";
+  option.disabled = true;
 
-    const priceText =
-      Number(service.price || 0) > 0
-        ? "¥" +
-          Number(service.price).toLocaleString("ja-JP")
-        : "";
+} else if (
+  !service.available
+) {
 
-    const remainingText =
-      service.available
-        ? "残り " + service.remaining + "名"
-        : "満席";
+  option.textContent =
+    service.serviceName +
+    "｜満席";
 
-    programListEl.innerHTML += `
-      <label class="program-option ${disabled ? "disabled" : ""}">
-        <input
-          type="radio"
-          name="program"
-          value="${escapeHtml(service.serviceName)}"
-          data-service-id="${escapeHtml(service.serviceId)}"
-          data-price="${Number(service.price || 0)}"
-          data-remaining="${Number(service.remaining || 0)}"
-          ${disabled ? "disabled" : ""}
-          required
-        >
+  option.disabled = true;
 
-        <span class="program-title">
-          ${escapeHtml(service.serviceName)}
-        </span>
+} else {
 
-        <div class="program-meta">
-          ${timeText ? timeText + "<br>" : ""}
-          ${priceText}
-          ${priceText ? " / " : ""}
-          ${remainingText}
-        </div>
-      </label>
-    `;
-  });
+  option.textContent =
+    service.serviceName;
+
+  option.disabled = false;
 }
 
     function renderCompanionFields() {
