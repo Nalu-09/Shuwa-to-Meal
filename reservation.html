@@ -467,36 +467,149 @@ async function start() {
     }
 
     function renderProgramOptions(eventDate) {
+  selectedEvent =
+    reservationOptions.find(
+      function(option) {
+        return (
+          option.eventDate ===
+          eventDate
+        );
+      }
+    );
+
+  programListEl.innerHTML = "";
+
   if (
-  service.reservationStarted ===
-    false &&
-  service.reservationStartText
-) {
+    !selectedEvent ||
+    !Array.isArray(
+      selectedEvent.services
+    )
+  ) {
+    return;
+  }
 
-  option.textContent =
-    service.serviceName +
-    "｜" +
-    service.reservationStartText +
-    "より申込開始";
 
-  option.disabled = true;
+  selectedEvent.services.forEach(
+    function(service) {
 
-} else if (
-  !service.available
-) {
+      const beforeStart =
+        service.reservationStarted ===
+          false &&
+        service.reservationStartText;
 
-  option.textContent =
-    service.serviceName +
-    "｜満席";
 
-  option.disabled = true;
+      const disabled =
+        beforeStart ||
+        !service.available;
 
-} else {
 
-  option.textContent =
-    service.serviceName;
+      const timeText =
+        service.startTime ||
+        service.endTime
+          ? escapeHtml(
+              service.startTime || ""
+            ) +
+            " - " +
+            escapeHtml(
+              service.endTime || ""
+            )
+          : "";
 
-  option.disabled = false;
+
+      const priceText =
+        Number(
+          service.price || 0
+        ) > 0
+          ? "¥" +
+            Number(
+              service.price
+            ).toLocaleString(
+              "ja-JP"
+            )
+          : "";
+
+
+      let statusText = "";
+
+
+      if (beforeStart) {
+
+        statusText =
+          escapeHtml(
+            service.reservationStartText
+          ) +
+          "より申込開始";
+
+      } else if (
+        !service.available
+      ) {
+
+        statusText =
+          "満席";
+
+      } else {
+
+        statusText =
+          "残り " +
+          service.remaining +
+          "名";
+      }
+
+
+      programListEl.innerHTML += `
+
+        <label
+          class="program-option
+          ${disabled ? "disabled" : ""}"
+        >
+
+          <input
+            type="radio"
+            name="program"
+            value="${escapeHtml(
+              service.serviceName
+            )}"
+            data-service-id="${escapeHtml(
+              service.serviceId
+            )}"
+            data-price="${Number(
+              service.price || 0
+            )}"
+            data-remaining="${Number(
+              service.remaining || 0
+            )}"
+            ${disabled
+              ? "disabled"
+              : ""}
+            required
+          >
+
+          <span class="program-title">
+            ${escapeHtml(
+              service.serviceName
+            )}
+          </span>
+
+          <div class="program-meta">
+
+            ${timeText
+              ? timeText + "<br>"
+              : ""}
+
+            ${priceText}
+
+            ${priceText
+              ? " / "
+              : ""}
+
+            ${statusText}
+
+          </div>
+
+        </label>
+      `;
+    }
+  );
 }
 
     function renderCompanionFields() {
