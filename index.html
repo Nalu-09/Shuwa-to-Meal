@@ -3298,6 +3298,326 @@ setupVenueSelect();
     html;
 
 }
+
+    function openExistingServiceEdit(
+  serviceId
+) {
+
+  if (!serviceManagementData) {
+    return;
+  }
+
+
+  const services =
+    Array.isArray(
+      serviceManagementData.services
+    )
+      ? serviceManagementData.services
+      : [];
+
+
+  const service =
+    services.find(function(item) {
+
+      return (
+        String(
+          item.service_id || ""
+        ).trim() ===
+        String(
+          serviceId || ""
+        ).trim()
+      );
+
+    });
+
+
+  if (!service) {
+
+    alert(
+      "予約枠情報を取得できませんでした。"
+    );
+
+    return;
+
+  }
+
+
+  const card =
+    document.querySelector(
+      '.service-slot-card[data-service-id="' +
+      CSS.escape(serviceId) +
+      '"]'
+    );
+
+
+  if (!card) {
+    return;
+  }
+
+
+  const startTime =
+    normalizeTimeForInput_(
+      service.start_time || ""
+    );
+
+
+  const endTime =
+    normalizeTimeForInput_(
+      service.end_time || ""
+    );
+
+
+  const linePublishAt =
+    splitAdminDateTime_(
+      service.line_publish_at || ""
+    );
+
+
+  const webPublishAt =
+    splitAdminDateTime_(
+      service.web_publish_at || ""
+    );
+
+
+  card.innerHTML = `
+
+    <div class="slot-name">
+      予約枠を修正
+    </div>
+
+
+    <label class="form-label">
+      開催日
+    </label>
+
+    <input
+      type="date"
+      id="existing-date-${escapeHtml_(serviceId)}"
+      class="service-form-control"
+      value="${escapeHtml_(
+        normalizeDateForInput_(
+          service.event_date || ""
+        )
+      )}"
+    >
+
+
+    <label class="form-label">
+      開始時間
+    </label>
+
+    <input
+      type="time"
+      id="existing-start-${escapeHtml_(serviceId)}"
+      class="service-form-control"
+      value="${escapeHtml_(
+        startTime
+      )}"
+    >
+
+
+    <label class="form-label">
+      終了時間
+    </label>
+
+    <input
+      type="time"
+      id="existing-end-${escapeHtml_(serviceId)}"
+      class="service-form-control"
+      value="${escapeHtml_(
+        endTime
+      )}"
+    >
+
+
+    <label class="form-label">
+      上限人数
+    </label>
+
+    <input
+      type="number"
+      id="existing-capacity-${escapeHtml_(serviceId)}"
+      class="service-form-control"
+      min="1"
+      value="${escapeHtml_(
+        String(
+          service.capacity || ""
+        )
+      )}"
+    >
+
+
+    <label class="form-label">
+      料金
+    </label>
+
+    <input
+      type="number"
+      id="existing-price-${escapeHtml_(serviceId)}"
+      class="service-form-control"
+      min="0"
+      value="${escapeHtml_(
+        String(
+          service.price || 0
+        )
+      )}"
+    >
+
+
+    <label class="form-label">
+      LINE先行公開
+    </label>
+
+    <div class="publish-row">
+
+      <input
+        type="date"
+        id="existing-line-date-${escapeHtml_(serviceId)}"
+        class="service-form-control"
+        value="${escapeHtml_(
+          linePublishAt.date
+        )}"
+      >
+
+      <input
+        type="time"
+        id="existing-line-time-${escapeHtml_(serviceId)}"
+        class="service-form-control"
+        value="${escapeHtml_(
+          linePublishAt.time
+        )}"
+      >
+
+    </div>
+
+
+    <label class="form-label">
+      Web一般公開
+    </label>
+
+    <div class="publish-row">
+
+      <input
+        type="date"
+        id="existing-web-date-${escapeHtml_(serviceId)}"
+        class="service-form-control"
+        value="${escapeHtml_(
+          webPublishAt.date
+        )}"
+      >
+
+      <input
+        type="time"
+        id="existing-web-time-${escapeHtml_(serviceId)}"
+        class="service-form-control"
+        value="${escapeHtml_(
+          webPublishAt.time
+        )}"
+      >
+
+    </div>
+
+
+    <button
+      type="button"
+      class="service-save-button"
+      onclick="saveExistingServiceEdit(
+        '${escapeJs(serviceId)}'
+      )"
+    >
+      修正内容を保存
+    </button>
+
+
+    <button
+      type="button"
+      class="edit-reservation-button"
+      onclick="renderExistingServices()"
+    >
+      キャンセル
+    </button>
+
+  `;
+
+}
+    function normalizeDateForInput_(
+  value
+) {
+
+  if (!value) {
+    return "";
+  }
+
+
+  return String(value)
+    .trim()
+    .replaceAll("/", "-");
+
+}
+
+
+function splitAdminDateTime_(
+  value
+) {
+
+  const result = {
+    date: "",
+    time: ""
+  };
+
+
+  if (!value) {
+    return result;
+  }
+
+
+  const text =
+    String(value).trim();
+
+
+  const parts =
+    text.split("T");
+
+
+  if (parts.length >= 2) {
+
+    result.date =
+      parts[0] || "";
+
+    result.time =
+      normalizeTimeForInput_(
+        parts[1] || ""
+      );
+
+    return result;
+
+  }
+
+
+  const spaceParts =
+    text.split(" ");
+
+
+  if (spaceParts.length >= 2) {
+
+    result.date =
+      String(
+        spaceParts[0] || ""
+      ).replaceAll("/", "-");
+
+    result.time =
+      normalizeTimeForInput_(
+        spaceParts[1] || ""
+      );
+
+  }
+
+
+  return result;
+
+}
+
+    
     function setupVenueSelect() {
   if (!serviceManagementData) {
     return;
