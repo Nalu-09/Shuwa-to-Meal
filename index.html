@@ -3540,6 +3540,320 @@ setupVenueSelect();
   `;
 
 }
+
+    async function saveExistingServiceEdit(
+  serviceId
+) {
+
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+    alert(
+      "スタッフ情報を取得できませんでした。"
+    );
+    return;
+  }
+
+
+  if (!serviceManagementData) {
+    alert(
+      "予約枠情報を取得できませんでした。"
+    );
+    return;
+  }
+
+
+  const services =
+    Array.isArray(
+      serviceManagementData.services
+    )
+      ? serviceManagementData.services
+      : [];
+
+
+  const service =
+    services.find(function(item) {
+      return (
+        String(
+          item.service_id || ""
+        ).trim() ===
+        String(
+          serviceId || ""
+        ).trim()
+      );
+    });
+
+
+  if (!service) {
+    alert(
+      "予約枠情報を取得できませんでした。"
+    );
+    return;
+  }
+
+
+  const eventDate =
+    document.getElementById(
+      "existing-date-" +
+      serviceId
+    ).value;
+
+
+  const startTime =
+    document.getElementById(
+      "existing-start-" +
+      serviceId
+    ).value;
+
+
+  const endTime =
+    document.getElementById(
+      "existing-end-" +
+      serviceId
+    ).value;
+
+
+  const capacity =
+    document.getElementById(
+      "existing-capacity-" +
+      serviceId
+    ).value;
+
+
+  const price =
+    document.getElementById(
+      "existing-price-" +
+      serviceId
+    ).value;
+
+
+  const lineDate =
+    document.getElementById(
+      "existing-line-date-" +
+      serviceId
+    ).value;
+
+
+  const lineTime =
+    document.getElementById(
+      "existing-line-time-" +
+      serviceId
+    ).value;
+
+
+  const webDate =
+    document.getElementById(
+      "existing-web-date-" +
+      serviceId
+    ).value;
+
+
+  const webTime =
+    document.getElementById(
+      "existing-web-time-" +
+      serviceId
+    ).value;
+
+
+  if (
+    !eventDate ||
+    !startTime ||
+    !endTime
+  ) {
+    alert(
+      "開催日と開始・終了時間を確認してください。"
+    );
+    return;
+  }
+
+
+  if (
+    !capacity ||
+    Number(capacity) < 1
+  ) {
+    alert(
+      "上限人数を確認してください。"
+    );
+    return;
+  }
+
+
+  if (
+    price === "" ||
+    Number(price) < 0
+  ) {
+    alert(
+      "料金を確認してください。"
+    );
+    return;
+  }
+
+
+  const venueId =
+    String(
+      service.venue_id || ""
+    ).trim();
+
+
+  const programId =
+    String(
+      service.program_id || ""
+    ).trim();
+
+
+  if (
+    !venueId ||
+    !programId
+  ) {
+    alert(
+      "会場またはプログラム情報を取得できませんでした。"
+    );
+    return;
+  }
+
+
+  const linePublicAt =
+    lineDate
+      ? (
+          lineDate +
+          "T" +
+          (
+            lineTime ||
+            "00:00"
+          )
+        )
+      : "";
+
+
+  const webPublicAt =
+    webDate
+      ? (
+          webDate +
+          "T" +
+          (
+            webTime ||
+            "00:00"
+          )
+        )
+      : "";
+
+
+  const confirmed =
+    window.confirm(
+      "この内容で予約枠を修正しますか？"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            new URLSearchParams({
+
+              action:
+                "updateServiceSlot",
+
+              adminUserId:
+                currentProfile.userId,
+
+              serviceId:
+                serviceId,
+
+              venueId:
+                venueId,
+
+              programId:
+                programId,
+
+              eventDate:
+                eventDate,
+
+              startTime:
+                startTime,
+
+              endTime:
+                endTime,
+
+              capacity:
+                String(
+                  Number(capacity)
+                ),
+
+              price:
+                String(
+                  Number(price)
+                ),
+
+              linePublicAt:
+                linePublicAt,
+
+              webPublicAt:
+                webPublicAt
+
+            })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (!data.ok) {
+
+      alert(
+        "修正できませんでした。\n" +
+        (
+          data.message ||
+          ""
+        )
+      );
+
+      return;
+
+    }
+
+
+    /*
+     * 最新の予約枠情報を再取得
+     */
+    serviceManagementData =
+      null;
+
+
+    await preloadServiceManagement();
+
+
+    renderExistingServices();
+
+
+    alert(
+      "予約枠を修正しました。"
+    );
+
+
+  } catch (err) {
+
+    alert(
+      "修正中にエラーが発生しました。\n" +
+      err.message
+    );
+
+  }
+
+}
+    
     function normalizeDateForInput_(
   value
 ) {
