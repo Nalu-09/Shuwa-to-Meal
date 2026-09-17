@@ -620,20 +620,20 @@
 
       <div class="menu">
   <button
-    id="reservationButton"
-    onclick="loadReservations()"
-    disabled
-  >
-    予約管理
-  </button>
+  id="reservationButton"
+  onclick="loadReservations()"
+  style="visibility:hidden;"
+>
+  予約管理
+</button>
 
-  <button
-    id="serviceManagementButton"
-    onclick="openServiceManagement()"
-    style="display:none;"
-  >
-    予約枠管理
-  </button>
+<button
+  id="serviceManagementButton"
+  onclick="openServiceManagement()"
+  style="visibility:hidden;"
+>
+  予約枠管理
+</button>
 </div>
 
       <div id="reservation" class="panel">
@@ -810,37 +810,158 @@
     let serviceManagementData = null;
 
     async function initLiff() {
-      const pageStatus = document.getElementById("pageStatus");
-      const reservationButton = document.getElementById("reservationButton");
+  const pageStatus =
+    document.getElementById(
+      "pageStatus"
+    );
 
-      try {
-        pageStatus.textContent = "LIFF初期化中...";
+  const reservationButton =
+    document.getElementById(
+      "reservationButton"
+    );
 
-        await liff.init({
-          liffId: LIFF_ID
-        });
+  const serviceManagementButton =
+    document.getElementById(
+      "serviceManagementButton"
+    );
 
-        if (!liff.isLoggedIn()) {
-          pageStatus.textContent = "LINEログインへ移動します...";
-          liff.login();
-          return;
+  try {
+    /*
+     * 最初は両方とも見せない。
+     * 片方だけ先に出る状態をなくす。
+     */
+    reservationButton.style.display =
+      "none";
+
+    serviceManagementButton.style.display =
+      "none";
+
+    pageStatus.textContent =
+      "読み込み中...";
+
+
+    await liff.init({
+      liffId: LIFF_ID
+    });
+
+
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
+
+
+    currentProfile =
+      await liff.getProfile();
+
+
+    /*
+     * 予約枠管理の権限・データを先に取得。
+     * この処理が終わるまでメニューボタンは出さない。
+     */
+    await preloadServiceManagement();
+
+
+    /*
+     * 必要な権限判定が終わったあとで
+     * 一斉に表示する。
+     */
+    reservationButton.disabled =
+      false;
+
+    reservationButton.style.display =
+      "";
+
+
+    if (
+      serviceManagementData &&
+      serviceManagementData.permissions &&
+      serviceManagementData.permissions
+        .createSchedule
+    ) {
+      serviceManagementButton.style.display =
+        "";
+    } else {
+      serviceManagementButton.style.display =
+        "none";
+    }
+
+
+    pageStatus.textContent =
+      "";
+
+
+    /*
+     * 予約一覧は裏で先読み。
+     * ボタンを押した時の待ち時間を減らす。
+     */
+    preloadReservations();
+
+
+  } catch (err) {
+    pageStatus.textContent =
+      "初期化に失敗しました。\n" +
+      err.message;
+
+    reservationButton.disabled =
+      true;
+  }
+}
+
+    let reservationPreloadPromise =
+  null;
+
+let reservationPreloadData =
+  null;
+
+
+function preloadReservations() {
+  if (
+    reservationPreloadPromise ||
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+    return;
+  }
+
+
+  reservationPreloadPromise =
+    fetch(
+      API_URL,
+      {
+        method:
+          "POST",
+
+        body:
+          new URLSearchParams({
+            action:
+              "getReservations",
+
+            adminUserId:
+              currentProfile.userId
+          })
+      }
+    )
+      .then(function(res) {
+        return res.json();
+      })
+      .then(function(data) {
+        if (data && data.ok) {
+          reservationPreloadData =
+            data;
         }
 
-        currentProfile = await liff.getProfile();
+        return data;
+      })
+      .catch(function(error) {
+        console.error(
+          "予約先読みエラー",
+          error
+        );
 
-        pageStatus.textContent = "";
-reservationButton.disabled = false;
-
-await preloadServiceManagement();
-
-      } catch (err) {
-        pageStatus.textContent =
-          "LIFFの初期化に失敗しました。\n" +
-          err.message;
-
-        reservationButton.disabled = true;
-      }
-    }
+        return null;
+      });
+}
 
     async function preloadServiceManagement() {
   const button =
