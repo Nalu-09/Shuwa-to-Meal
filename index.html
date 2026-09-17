@@ -822,10 +822,12 @@
     const LIFF_ID = "2007730715-DyW80WjD";
     const API_URL = "https://script.google.com/macros/s/AKfycbxoUCShYsMc8J0cPEwIU0JPrCIKgoT-zHYxWZ_w6T8tqchdRnemhDr1CEexbVa-aDMRDA/exec";
 
-    let currentProfile = null;
-    let allReservations = [];
-    let lastScrollY = 0;
-    let serviceManagementData = null;
+let currentProfile = null;
+let allReservations = [];
+let lastScrollY = 0;
+
+let serviceManagementData = null;
+let serviceManagementPreloadPromise = null;
 
     async function initLiff() {
 
@@ -1082,79 +1084,154 @@ function preloadReservations() {
 
 }
 
-    async function preloadServiceManagement() {
-  const button =
-    document.getElementById(
-      "serviceManagementButton"
-    );
+    function preloadServiceManagement() {
+
+  /*
+   * すでに取得開始済みなら
+   * 同じ通信を使い回す
+   */
+  if (
+    serviceManagementPreloadPromise
+  ) {
+    return serviceManagementPreloadPromise;
+  }
+
 
   if (
     !currentProfile ||
     !currentProfile.userId
   ) {
-    return;
+    return Promise.resolve(null);
   }
 
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
 
-      body: new URLSearchParams({
-        action:
-          "getServiceManagementData",
+  const button =
+    document.getElementById(
+      "serviceManagementButton"
+    );
 
-        adminUserId:
-          currentProfile.userId
+
+  serviceManagementPreloadPromise =
+    fetch(
+      API_URL,
+      {
+        method: "POST",
+
+        body:
+          new URLSearchParams({
+            action:
+              "getServiceManagementData",
+
+            adminUserId:
+              currentProfile.userId
+          })
+      }
+    )
+
+      .then(function(res) {
+        return res.json();
       })
-    });
 
-    const data =
-      await res.json();
+      .then(function(data) {
 
-    /*
-     * 調理補助はここでpermission_denied
-     * → ボタン自体を表示しない
-     */
-    if (!data.ok) {
-  button.style.display = "none";
-  serviceManagementData = null;
+        if (!data.ok) {
 
-  if (data.message === "permission_denied") {
-    return;
-  }
+          if (button) {
+            button.style.display =
+              "none";
+          }
 
-  const pageStatus =
-    document.getElementById("pageStatus");
+          serviceManagementData =
+            null;
 
-  pageStatus.textContent =
-    "予約枠管理を取得できませんでした：" +
-    (data.message || "");
+          if (
+            data.message !==
+            "permission_denied"
+          ) {
 
-  return;
-}
+            const pageStatus =
+              document.getElementById(
+                "pageStatus"
+              );
 
-const permissions =
-  data.permissions || {};
+            if (pageStatus) {
+              pageStatus.textContent =
+                "予約枠管理を取得できませんでした：" +
+                (
+                  data.message ||
+                  ""
+                );
+            }
 
-if (!permissions.createSchedule) {
-  button.style.display = "none";
-  serviceManagementData = null;
-  return;
-}
+          }
 
-serviceManagementData = data;
-button.style.display = "block";
+          return data;
+        }
 
-  } catch (err) {
-  button.style.display = "none";
 
-  const pageStatus =
-    document.getElementById("pageStatus");
+        const permissions =
+          data.permissions || {};
 
-  pageStatus.textContent =
-    "予約枠管理エラー：" +
-    err.message;
-}
+
+        if (
+          !permissions.createSchedule
+        ) {
+
+          if (button) {
+            button.style.display =
+              "none";
+          }
+
+          serviceManagementData =
+            null;
+
+          return data;
+        }
+
+
+        serviceManagementData =
+          data;
+
+
+        if (button) {
+          button.style.display =
+            "block";
+        }
+
+
+        return data;
+
+      })
+
+      .catch(function(err) {
+
+        console.error(
+          "予約枠管理先読みエラー",
+          err
+        );
+
+        serviceManagementData =
+          null;
+
+        /*
+         * 失敗時は次回再試行できるようにする
+         */
+        serviceManagementPreloadPromise =
+          null;
+
+
+        if (button) {
+          button.style.display =
+            "none";
+        }
+
+
+        return null;
+
+      });
+
+
+  return serviceManagementPreloadPromise;
 }
 
     function showPanel(id) {
@@ -3828,11 +3905,13 @@ setupVenueSelect();
     /*
      * 最新の予約枠情報を再取得
      */
-    serviceManagementData =
-      null;
+   serviceManagementData =
+  null;
 
+serviceManagementPreloadPromise =
+  null;
 
-    await preloadServiceManagement();
+await preloadServiceManagement();
 
 
     renderExistingServices();
@@ -4526,6 +4605,13 @@ function splitAdminDateTime_(
     /*
      * 最新データ再取得
      */
+
+    serviceManagementData =
+  null;
+
+serviceManagementPreloadPromise =
+  null;
+    
     await preloadServiceManagement();
 
 
