@@ -371,86 +371,211 @@ async function loadLiffSdk() {
 
 
 async function start() {
+
   try {
 
     /*
-     * 一般Webからのアクセス
+     * 一般Web
      */
     if (source !== "line") {
+
       await loadReservationOptions();
+
       return;
+
     }
 
+
     /*
-     * LINE / LIFFからのアクセス
+     * LINE / LIFF
      */
     statusEl.textContent =
       "予約フォームを起動しています...";
 
-    await loadLiffSdk();
 
-    await liff.init({
-      liffId: LIFF_ID
-    });
+    /*
+     * =========================
+     * 重要
+     *
+     * LIFF処理と予約枠取得を
+     * 同時に開始する
+     * =========================
+     */
 
-    if (!liff.isLoggedIn()) {
-      liff.login();
+    const reservationPromise =
+      fetchReservationOptionsData();
+
+
+    const liffPromise =
+      (async function() {
+
+        await loadLiffSdk();
+
+        await liff.init({
+          liffId: LIFF_ID
+        });
+
+        if (!liff.isLoggedIn()) {
+
+          liff.login();
+
+          return false;
+
+        }
+
+        return true;
+
+      })();
+
+
+    /*
+     * LIFF完了待ち
+     */
+    const loggedIn =
+      await liffPromise;
+
+
+    if (!loggedIn) {
       return;
     }
 
-    await loadReservationOptions();
+
+    /*
+     * 予約枠取得完了待ち
+     *
+     * すでに通信は先に始まっている
+     */
+    const data =
+      await reservationPromise;
+
+
+    applyReservationOptionsData(
+      data
+    );
+
 
   } catch (error) {
+
     statusEl.textContent =
       "起動中にエラーが発生しました。\n" +
       error.message;
+
   }
+
 }
-    
-    start();
+
+    async function fetchReservationOptionsData() {
+
+  const res =
+    await fetch(
+      API_URL,
+      {
+        method: "POST",
+
+        body:
+          new URLSearchParams({
+
+            action:
+              "getReservationOptions",
+
+            source:
+              source
+
+          })
+      }
+    );
+
+
+  const data =
+    await res.json();
+
+
+  return data;
+
+}
+
+    function applyReservationOptionsData(
+  data
+) {
+
+  if (
+    !data ||
+    !data.ok
+  ) {
+
+    statusEl.textContent =
+      "開催情報を取得できませんでした。\n" +
+      (
+        data &&
+        data.message
+          ? data.message
+          : ""
+      );
+
+    return;
+
+  }
+
+
+  reservationOptions =
+    data.options || [];
+
+
+  paymentSettings =
+    data.paymentSettings || {};
+
+
+  if (
+    reservationOptions.length === 0
+  ) {
+
+    statusEl.textContent =
+      "現在、受付中の開催はありません。";
+
+    return;
+
+  }
+
+
+  renderEventDateOptions();
+
+
+  statusEl.textContent =
+    "";
+
+
+  formEl.classList.remove(
+    "hidden"
+  );
+
+}
 
     async function loadReservationOptions() {
-      try {
-        statusEl.textContent = "開催情報を読み込み中...";
 
-        const res = await fetch(API_URL, {
-          method: "POST",
-          body: new URLSearchParams({
-            action: "getReservationOptions",
-            source: source
-          })
-        });
+  try {
 
-        const data = await res.json();
+    statusEl.textContent =
+      "開催情報を読み込み中...";
 
-        if (!data.ok) {
-          statusEl.textContent =
-            "開催情報を取得できませんでした。\n" +
-            (data.message || "");
-          return;
-        }
 
-        reservationOptions = data.options || [];
-        paymentSettings =
-  data.paymentSettings || {};
+    const data =
+      await fetchReservationOptionsData();
 
-        if (reservationOptions.length === 0) {
-          statusEl.textContent =
-            "現在、受付中の開催はありません。";
-          return;
-        }
 
-        renderEventDateOptions();
+    applyReservationOptionsData(
+      data
+    );
 
-        statusEl.textContent = "";
-        formEl.classList.remove("hidden");
 
-      } catch (err) {
-        statusEl.textContent =
-          "開催情報の取得中にエラーが発生しました。\n" +
-          err.message;
-      }
-    }
+  } catch (err) {
+
+    statusEl.textContent =
+      "開催情報の取得中にエラーが発生しました。\n" +
+      err.message;
+
+  }
+
+}
 
     function renderEventDateOptions() {
       eventDateEl.innerHTML =
