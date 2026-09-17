@@ -1739,11 +1739,6 @@ button.style.display = "block";
             ${escapeHtml(r.note || "なし")}
           </div>
 
-          <div>
-  備考：
-  ${escapeHtml(r.note || "なし")}
-</div>
-
 <button
   type="button"
   class="edit-reservation-button"
@@ -1755,7 +1750,6 @@ button.style.display = "block";
   受付内容を修正
 </button>
 `;
-      `;
 
       if (r.checkedIn) {
         html += `
