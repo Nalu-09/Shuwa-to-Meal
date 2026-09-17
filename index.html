@@ -2965,15 +2965,338 @@ setupVenueSelect();
    */
   if (permissions.editSchedule) {
 
-    existingSection.style.display =
-      "block";
+  existingSection.style.display =
+    "block";
 
-  } else {
+  renderExistingServices();
+
+} else {
 
     existingSection.style.display =
       "none";
 
   }
+}
+
+    function renderExistingServices() {
+
+  const section =
+    document.getElementById(
+      "existingServiceSection"
+    );
+
+  const container =
+    document.getElementById(
+      "existingServiceList"
+    );
+
+
+  if (!section || !container) {
+    return;
+  }
+
+
+  if (!serviceManagementData) {
+
+    container.innerHTML =
+      '<div class="slot-program-empty">' +
+      '予約枠情報を取得できませんでした。' +
+      '</div>';
+
+    return;
+
+  }
+
+
+  const services =
+    Array.isArray(
+      serviceManagementData.services
+    )
+      ? serviceManagementData.services
+      : [];
+
+
+  /*
+   * 現在日時
+   */
+  const now =
+    new Date();
+
+
+  /*
+   * 現在日時より未来の予約枠のみ
+   */
+  const futureServices =
+    services
+      .filter(function(service) {
+
+        const eventDate =
+          String(
+            service.event_date || ""
+          ).trim();
+
+        const startTime =
+          normalizeTimeForInput_(
+            service.start_time || ""
+          );
+
+
+        if (
+          !eventDate ||
+          !startTime
+        ) {
+          return false;
+        }
+
+
+        const parts =
+          eventDate
+            .replaceAll("-", "/")
+            .split("/");
+
+
+        if (parts.length < 3) {
+          return false;
+        }
+
+
+        const timeParts =
+          startTime.split(":");
+
+
+        if (timeParts.length < 2) {
+          return false;
+        }
+
+
+        const startDateTime =
+          new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2]),
+            Number(timeParts[0]),
+            Number(timeParts[1]),
+            0,
+            0
+          );
+
+
+        if (
+          Number.isNaN(
+            startDateTime.getTime()
+          )
+        ) {
+          return false;
+        }
+
+
+        return (
+          startDateTime.getTime() >
+          now.getTime()
+        );
+
+      })
+      .sort(function(a, b) {
+
+        const aKey =
+          String(
+            a.event_date || ""
+          ) +
+          " " +
+          normalizeTimeForInput_(
+            a.start_time || ""
+          );
+
+        const bKey =
+          String(
+            b.event_date || ""
+          ) +
+          " " +
+          normalizeTimeForInput_(
+            b.start_time || ""
+          );
+
+
+        return aKey.localeCompare(
+          bKey
+        );
+
+      });
+
+
+  if (!futureServices.length) {
+
+    container.innerHTML =
+      '<div class="slot-program-empty">' +
+      '修正可能な予約枠はありません。' +
+      '</div>';
+
+    return;
+
+  }
+
+
+  let html = "";
+
+
+  futureServices.forEach(
+    function(service) {
+
+      const serviceId =
+        String(
+          service.service_id || ""
+        ).trim();
+
+
+      const serviceName =
+        String(
+          service.service_name || ""
+        ).trim();
+
+
+      const eventDate =
+        String(
+          service.event_date || ""
+        ).trim();
+
+
+      const startTime =
+        normalizeTimeForInput_(
+          service.start_time || ""
+        );
+
+
+      const endTime =
+        normalizeTimeForInput_(
+          service.end_time || ""
+        );
+
+
+      const capacity =
+        Number(
+          service.capacity || 0
+        );
+
+
+      const price =
+        Number(
+          service.price || 0
+        );
+
+
+      const status =
+        String(
+          service.status || ""
+        ).trim();
+
+
+      const linePublishAt =
+        String(
+          service.line_publish_at || ""
+        ).trim();
+
+
+      const webPublishAt =
+        String(
+          service.web_publish_at || ""
+        ).trim();
+
+
+      html += `
+
+        <div
+          class="service-slot-card"
+          data-service-id="${escapeHtml_(serviceId)}"
+        >
+
+          <div class="slot-name">
+            ${escapeHtml_(serviceName)}
+          </div>
+
+
+          <div>
+            開催日：
+            ${escapeHtml_(eventDate)}
+          </div>
+
+
+          <div>
+            時間：
+            ${escapeHtml_(startTime)}
+            〜
+            ${escapeHtml_(endTime)}
+          </div>
+
+
+          <div>
+            上限人数：
+            ${escapeHtml_(
+              String(capacity)
+            )}名
+          </div>
+
+
+          <div>
+            料金：
+            ${escapeHtml_(
+              String(price)
+            )}円
+          </div>
+
+
+          <div>
+            状態：
+            ${escapeHtml_(
+              status || "未設定"
+            )}
+          </div>
+
+
+          <div class="small">
+            LINE公開：
+            ${
+              linePublishAt
+                ? escapeHtml_(
+                    linePublishAt
+                  )
+                : "非公開"
+            }
+          </div>
+
+
+          <div class="small">
+            Web公開：
+            ${
+              webPublishAt
+                ? escapeHtml_(
+                    webPublishAt
+                  )
+                : "非公開"
+            }
+          </div>
+
+
+          <button
+            type="button"
+            class="edit-reservation-button"
+            onclick="openExistingServiceEdit(
+              '${escapeJs(serviceId)}'
+            )"
+          >
+            修正する
+          </button>
+
+        </div>
+
+      `;
+
+    }
+  );
+
+
+  container.innerHTML =
+    html;
+
 }
     function setupVenueSelect() {
   if (!serviceManagementData) {
