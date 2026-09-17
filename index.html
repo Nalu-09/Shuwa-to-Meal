@@ -905,13 +905,18 @@ let serviceManagementPreloadPromise = null;
      * =========================
      */
 
-    await Promise.allSettled([
+   /*
+ * 予約管理だけ先に待つ
+ */
+const reservationData =
+  await preloadReservations();
 
-      preloadReservations(),
 
-      preloadServiceManagement()
-
-    ]);
+/*
+ * 予約枠管理は裏で取得開始
+ * ここでは待たない
+ */
+preloadServiceManagement();
 
 
     /*
@@ -927,22 +932,26 @@ let serviceManagementPreloadPromise = null;
     /*
      * 予約枠管理ボタン
      */
-    if (
-      serviceManagementData &&
-      serviceManagementData.permissions &&
-      serviceManagementData.permissions
-        .createSchedule
-    ) {
+    const reservationPermissions =
+  reservationData &&
+  reservationData.permissions
+    ? reservationData.permissions
+    : {};
 
-      serviceManagementButton.style.display =
-        "";
 
-    } else {
+if (
+  reservationPermissions.createSchedule
+) {
 
-      serviceManagementButton.style.display =
-        "none";
+  serviceManagementButton.style.display =
+    "";
 
-    }
+} else {
+
+  serviceManagementButton.style.display =
+    "none";
+
+}
 
 
     /*
@@ -959,16 +968,13 @@ let serviceManagementPreloadPromise = null;
       "visible";
 
     if (
-      serviceManagementData &&
-      serviceManagementData.permissions &&
-      serviceManagementData.permissions
-        .createSchedule
-    ) {
+  reservationPermissions.createSchedule
+) {
 
-      serviceManagementButton.style.visibility =
-        "visible";
+  serviceManagementButton.style.visibility =
+    "visible";
 
-    }
+}
 
 
     pageStatus.textContent =
