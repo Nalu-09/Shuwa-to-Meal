@@ -185,6 +185,24 @@
     box-shadow: 0 4px 12px rgba(58, 78, 69, .14);
   }
 
+    .edit-reservation-button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 16px;
+  border: 1px solid rgba(58, 78, 69, .22);
+  border-radius: 999px;
+  background: transparent;
+  color: #3A4E45;
+  font-size: 14px;
+  font-family: "Times New Roman", serif;
+  cursor: pointer;
+}
+
+.edit-reservation-button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
   .checkin-button:disabled {
     opacity: .45;
     cursor: not-allowed;
@@ -1720,6 +1738,23 @@ button.style.display = "block";
             備考：
             ${escapeHtml(r.note || "なし")}
           </div>
+
+          <div>
+  備考：
+  ${escapeHtml(r.note || "なし")}
+</div>
+
+<button
+  type="button"
+  class="edit-reservation-button"
+  onclick="openReservationEdit(
+    ${index},
+    ${reservationIndex}
+  )"
+>
+  受付内容を修正
+</button>
+`;
       `;
 
       if (r.checkedIn) {
@@ -1769,6 +1804,261 @@ button.style.display = "block";
   window.scrollTo(0, 0);
 }
 }
+
+  function openReservationEdit(
+  groupIndex,
+  reservationIndex
+) {
+
+  const group =
+    window.reservationGroups[
+      groupIndex
+    ];
+
+  if (!group) {
+    alert(
+      "予約情報を取得できませんでした。"
+    );
+    return;
+  }
+
+
+  const reservation =
+    group.reservations[
+      reservationIndex
+    ];
+
+  if (!reservation) {
+    alert(
+      "予約情報を取得できませんでした。"
+    );
+    return;
+  }
+
+
+  const card =
+    document.getElementById(
+      "reservation-card-" +
+      groupIndex +
+      "-" +
+      reservationIndex
+    );
+
+  if (!card) {
+    return;
+  }
+
+
+  card.innerHTML = `
+
+    <div class="name">
+      受付内容を修正
+    </div>
+
+
+    <label class="form-label">
+      名前
+    </label>
+
+    <input
+      type="text"
+      id="edit-name-${groupIndex}-${reservationIndex}"
+      class="service-form-control"
+      value="${escapeHtml(
+        reservation.originalName ||
+        reservation.name ||
+        ""
+      )}"
+    >
+
+
+    <label class="form-label">
+      名前（カナ）
+    </label>
+
+    <input
+      type="text"
+      id="edit-kana-${groupIndex}-${reservationIndex}"
+      class="service-form-control"
+      value="${escapeHtml(
+        reservation.kana || ""
+      )}"
+    >
+
+
+    <label class="form-label">
+      参加部
+    </label>
+
+    <select
+      id="edit-program-${groupIndex}-${reservationIndex}"
+      class="service-form-control"
+    >
+      <option value="第1部">
+        第1部
+      </option>
+
+      <option value="第2部">
+        第2部
+      </option>
+
+      <option value="両方">
+        両方
+      </option>
+    </select>
+
+
+    <label class="form-label">
+      人数
+    </label>
+
+    <input
+      type="number"
+      id="edit-people-${groupIndex}-${reservationIndex}"
+      class="service-form-control"
+      min="1"
+      value="${Number(
+        reservation.people || 1
+      )}"
+    >
+
+
+    <label class="form-label">
+      手話レベル
+    </label>
+
+    <input
+      type="text"
+      id="edit-sign-level-${groupIndex}-${reservationIndex}"
+      class="service-form-control"
+      value="${escapeHtml(
+        reservation.signLevel || ""
+      )}"
+    >
+
+
+    <label class="form-label">
+      アレルギー・嗜好NG
+    </label>
+
+    <textarea
+      id="edit-allergy-${groupIndex}-${reservationIndex}"
+      class="service-form-control"
+      rows="3"
+    >${escapeHtml(
+      reservation.allergy || ""
+    )}</textarea>
+
+
+    <label class="form-label">
+      SNS掲載
+    </label>
+
+    <select
+      id="edit-sns-${groupIndex}-${reservationIndex}"
+      class="service-form-control"
+    >
+      <option value="OK">
+        OK
+      </option>
+
+      <option value="NG">
+        NG
+      </option>
+    </select>
+
+
+    <label class="form-label">
+      備考
+    </label>
+
+    <textarea
+      id="edit-note-${groupIndex}-${reservationIndex}"
+      class="service-form-control"
+      rows="3"
+    >${escapeHtml(
+      reservation.note || ""
+    )}</textarea>
+
+
+    <button
+      type="button"
+      class="checkin-button"
+      onclick="saveReservationEdit(
+        ${groupIndex},
+        ${reservationIndex}
+      )"
+    >
+      修正内容を保存
+    </button>
+
+
+    <button
+      type="button"
+      class="edit-reservation-button"
+      onclick="renderDetail(
+        ${groupIndex},
+        {
+          keepScroll: true
+        }
+      )"
+    >
+      キャンセル
+    </button>
+
+  `;
+
+
+  /*
+   * 現在の参加部を選択
+   */
+  const programSelect =
+    document.getElementById(
+      "edit-program-" +
+      groupIndex +
+      "-" +
+      reservationIndex
+    );
+
+  if (programSelect) {
+
+    const currentProgram =
+      String(
+        reservation.program || ""
+      ).trim();
+
+    if (
+      currentProgram === "第1部" ||
+      currentProgram === "第2部" ||
+      currentProgram === "両方"
+    ) {
+      programSelect.value =
+        currentProgram;
+    }
+
+  }
+
+
+  /*
+   * SNS掲載状態
+   */
+  const snsSelect =
+    document.getElementById(
+      "edit-sns-" +
+      groupIndex +
+      "-" +
+      reservationIndex
+    );
+
+  if (snsSelect) {
+    snsSelect.value =
+      reservation.snsNg
+        ? "NG"
+        : "OK";
+  }
+
+}
+    
     function scrollToReservationCard(groupIndex, reservationIndex) {
   setTimeout(function() {
     const card = document.getElementById(
