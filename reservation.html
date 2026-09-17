@@ -378,30 +378,19 @@ async function start() {
      * 一般Web
      */
     if (source !== "line") {
-
       await loadReservationOptions();
-
       return;
-
     }
 
 
-    /*
-     * LINE / LIFF
-     */
     statusEl.textContent =
       "予約フォームを起動しています...";
 
 
     /*
-     * =========================
-     * 重要
-     *
-     * LIFF処理と予約枠取得を
-     * 同時に開始する
-     * =========================
+     * 開催情報取得を先に開始
+     * LIFF初期化と並列で進める
      */
-
     const reservationPromise =
       fetchReservationOptionsData();
 
@@ -416,11 +405,8 @@ async function start() {
         });
 
         if (!liff.isLoggedIn()) {
-
           liff.login();
-
           return false;
-
         }
 
         return true;
@@ -428,9 +414,6 @@ async function start() {
       })();
 
 
-    /*
-     * LIFF完了待ち
-     */
     const loggedIn =
       await liffPromise;
 
@@ -441,9 +424,8 @@ async function start() {
 
 
     /*
-     * 予約枠取得完了待ち
-     *
-     * すでに通信は先に始まっている
+     * LIFF初期化中に取得していた
+     * 開催情報を受け取る
      */
     const data =
       await reservationPromise;
@@ -463,6 +445,9 @@ async function start() {
   }
 
 }
+
+
+start();
 
     async function fetchReservationOptionsData() {
 
