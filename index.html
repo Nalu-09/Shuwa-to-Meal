@@ -810,6 +810,7 @@
     let serviceManagementData = null;
 
     async function initLiff() {
+
   const pageStatus =
     document.getElementById(
       "pageStatus"
@@ -826,9 +827,9 @@
     );
 
   try {
+
     /*
-     * 最初は両方とも見せない。
-     * 片方だけ先に出る状態をなくす。
+     * 最初は両方非表示
      */
     reservationButton.style.display =
       "none";
@@ -836,35 +837,65 @@
     serviceManagementButton.style.display =
       "none";
 
+    reservationButton.style.visibility =
+      "hidden";
+
+    serviceManagementButton.style.visibility =
+      "hidden";
+
     pageStatus.textContent =
       "読み込み中...";
 
 
+    /*
+     * LIFF初期化
+     */
     await liff.init({
       liffId: LIFF_ID
     });
 
 
+    /*
+     * LINEログイン
+     */
     if (!liff.isLoggedIn()) {
+
       liff.login();
+
       return;
+
     }
 
 
+    /*
+     * LINEプロフィール取得
+     */
     currentProfile =
       await liff.getProfile();
 
 
     /*
-     * 予約枠管理の権限・データを先に取得。
-     * この処理が終わるまでメニューボタンは出さない。
+     * =========================
+     * 重要
+     *
+     * 予約管理
+     * 予約枠管理
+     *
+     * を同時に取得する
+     * =========================
      */
-    await preloadServiceManagement();
+
+    await Promise.allSettled([
+
+      preloadReservations(),
+
+      preloadServiceManagement()
+
+    ]);
 
 
     /*
-     * 必要な権限判定が終わったあとで
-     * 一斉に表示する。
+     * 予約管理ボタン
      */
     reservationButton.disabled =
       false;
@@ -873,17 +904,50 @@
       "";
 
 
+    /*
+     * 予約枠管理ボタン
+     */
     if (
       serviceManagementData &&
       serviceManagementData.permissions &&
       serviceManagementData.permissions
         .createSchedule
     ) {
+
       serviceManagementButton.style.display =
         "";
+
     } else {
+
       serviceManagementButton.style.display =
         "none";
+
+    }
+
+
+    /*
+     * =========================
+     * 両方の判定終了後に表示
+     *
+     * これで
+     * 予約管理 → 少し遅れて予約枠管理
+     * という表示を防ぐ
+     * =========================
+     */
+
+    reservationButton.style.visibility =
+      "visible";
+
+    if (
+      serviceManagementData &&
+      serviceManagementData.permissions &&
+      serviceManagementData.permissions
+        .createSchedule
+    ) {
+
+      serviceManagementButton.style.visibility =
+        "visible";
+
     }
 
 
@@ -891,21 +955,17 @@
       "";
 
 
-    /*
-     * 予約一覧は裏で先読み。
-     * ボタンを押した時の待ち時間を減らす。
-     */
-    preloadReservations();
-
-
   } catch (err) {
+
     pageStatus.textContent =
       "初期化に失敗しました。\n" +
       err.message;
 
     reservationButton.disabled =
       true;
+
   }
+
 }
 
     let reservationPreloadPromise =
@@ -916,12 +976,28 @@ let reservationPreloadData =
 
 
 function preloadReservations() {
+
+  /*
+   * すでに取得開始済みなら
+   * 同じPromiseを返す
+   */
+  if (reservationPreloadPromise) {
+
+    return reservationPreloadPromise;
+
+  }
+
+
+  /*
+   * LINEプロフィール未取得なら終了
+   */
   if (
-    reservationPreloadPromise ||
     !currentProfile ||
     !currentProfile.userId
   ) {
-    return;
+
+    return Promise.resolve(null);
+
   }
 
 
@@ -929,38 +1005,63 @@ function preloadReservations() {
     fetch(
       API_URL,
       {
-        method:
-          "POST",
+        method: "POST",
 
         body:
           new URLSearchParams({
+
             action:
               "getReservations",
 
             adminUserId:
               currentProfile.userId
+
           })
       }
     )
+
       .then(function(res) {
+
         return res.json();
+
       })
+
       .then(function(data) {
-        if (data && data.ok) {
+
+        if (
+          data &&
+          data.ok
+        ) {
+
           reservationPreloadData =
             data;
+
         }
 
         return data;
+
       })
+
       .catch(function(error) {
+
         console.error(
           "予約先読みエラー",
           error
         );
 
         return null;
+
       });
+
+
+  /*
+   * 重要
+   *
+   * 呼び出し元が
+   * awaitできるようにする
+   */
+  return reservationPreloadPromise;
+
 }
 
     async function preloadServiceManagement() {
@@ -1052,84 +1153,204 @@ button.style.display = "block";
       }
     }
 
-    async function loadReservations() {
-      showPanel("reservation");
+   async function loadReservations() {
 
-      const list = document.getElementById("reservationList");
-      list.className = "status";
-      list.textContent = "参加者履歴を読み込み中...";
-
-      if (!currentProfile || !currentProfile.userId) {
-        list.textContent =
-          "LINEユーザー情報を取得できていません。\n" +
-          "ページを開き直してください。";
-        return;
-      }
-
-      try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          body: new URLSearchParams({
-            action: "getReservations",
-            adminUserId: currentProfile.userId
-          })
-        });
-
-        const data = await res.json();
-
-        if (!data.ok) {
-          if (data.message === "admin_only") {
-            list.textContent =
-              "このページは運営のみ閲覧できます。\n" +
-              "閲覧権限がありません。";
-            return;
-          }
-
-          list.textContent =
-            "参加者履歴を取得できませんでした。\n" +
-            (data.message || "");
-          return;
-        }
-
-        const permissions =
-  data.permissions || {};
-
-const canViewDetails =
-  Boolean(
-    permissions.viewParticipantDetails
+  /*
+   * 予約管理画面を表示
+   */
+  showPanel(
+    "reservation"
   );
 
-const programSummaries =
-  filterFutureReservations(
-    data.programSummaries || []
-  );
 
-allReservations =
-  filterFutureReservations(
-    data.reservations || []
-  );
+  const list =
+    document.getElementById(
+      "reservationList"
+    );
 
-if (programSummaries.length === 0) {
-  list.textContent =
-    "今日以降の予約はありません。";
-  return;
-}
 
-/*
- * 全スタッフ共通：
- * 人数・嗜好NGの一覧を表示
- */
-renderProgramSummaries(
-  programSummaries,
-  canViewDetails
-);
+  /*
+   * LINEユーザー確認
+   */
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
 
-      } catch (err) {
-        list.textContent =
-          "参加者履歴の取得中にエラーが発生しました。\n" +
-          err.message;
-      }
+    list.className =
+      "status";
+
+    list.textContent =
+      "LINEユーザー情報を取得できていません。\n" +
+      "ページを開き直してください。";
+
+    return;
+
+  }
+
+
+  try {
+
+    /*
+     * =========================
+     * 先読み済みデータを使用
+     * =========================
+     */
+
+    let data =
+      reservationPreloadData;
+
+
+    /*
+     * まだ通信中の場合だけ
+     * その通信終了を待つ
+     */
+    if (
+      !data &&
+      reservationPreloadPromise
+    ) {
+
+      list.className =
+        "status";
+
+      list.textContent =
+        "参加者履歴を読み込み中...";
+
+      data =
+        await reservationPreloadPromise;
+
     }
+
+
+    /*
+     * 万一先読みが開始されていなかった場合だけ
+     * ここで取得する
+     */
+    if (!data) {
+
+      list.className =
+        "status";
+
+      list.textContent =
+        "参加者履歴を読み込み中...";
+
+      data =
+        await preloadReservations();
+
+    }
+
+
+    /*
+     * データ取得失敗
+     */
+    if (
+      !data ||
+      !data.ok
+    ) {
+
+      if (
+        data &&
+        data.message ===
+          "admin_only"
+      ) {
+
+        list.className =
+          "status";
+
+        list.textContent =
+          "このページは運営のみ閲覧できます。\n" +
+          "閲覧権限がありません。";
+
+        return;
+
+      }
+
+
+      list.className =
+        "status";
+
+      list.textContent =
+        "参加者履歴を取得できませんでした。\n" +
+        (
+          data &&
+          data.message
+            ? data.message
+            : ""
+        );
+
+      return;
+
+    }
+
+
+    /*
+     * 権限
+     */
+    const permissions =
+      data.permissions || {};
+
+
+    const canViewDetails =
+      Boolean(
+        permissions
+          .viewParticipantDetails
+      );
+
+
+    /*
+     * 今日以降のみ
+     */
+    const programSummaries =
+      filterFutureReservations(
+        data.programSummaries || []
+      );
+
+
+    allReservations =
+      filterFutureReservations(
+        data.reservations || []
+      );
+
+
+    /*
+     * 予約なし
+     */
+    if (
+      programSummaries.length === 0
+    ) {
+
+      list.className =
+        "status";
+
+      list.textContent =
+        "今日以降の予約はありません。";
+
+      return;
+
+    }
+
+
+    /*
+     * 表示
+     */
+    renderProgramSummaries(
+      programSummaries,
+      canViewDetails
+    );
+
+
+  } catch (err) {
+
+    list.className =
+      "status";
+
+    list.textContent =
+      "参加者履歴の取得中にエラーが発生しました。\n" +
+      err.message;
+
+  }
+
+}
     
     function findReservationGroupIndex(
   date,
@@ -2205,12 +2426,10 @@ function showReceiptQr(
     return;
   }
 
-      setupVenueSelect();
-
-  /*
-   * 会場マスター反映
-   */
-  setupVenueSelect();
+      /*
+ * 会場マスター反映
+ */
+setupVenueSelect();
 
 
   /*
