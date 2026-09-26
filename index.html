@@ -957,14 +957,6 @@ preloadServiceManagement();
     ? reservationData.permissions
     : {};
 
-    alert(
-  JSON.stringify(
-    reservationPermissions,
-    null,
-    2
-  )
-);
-
     const canManageSettings =
   reservationPermissions.manageVenue ||
   reservationPermissions.manageProgram ||
