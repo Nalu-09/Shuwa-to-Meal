@@ -721,6 +721,51 @@
     管理設定に戻る
   </button>
 
+      <div class="service-management-section">
+
+  <div class="service-management-title">
+    会場を追加
+  </div>
+
+  <label class="form-label">
+    会場名
+  </label>
+
+  <input
+    type="text"
+    id="venueMasterName"
+    class="service-form-control"
+  >
+
+
+  <label class="form-label">
+    表示順
+  </label>
+
+  <input
+    type="number"
+    id="venueMasterOrder"
+    class="service-form-control"
+    min="0"
+    value="0"
+  >
+
+
+  <button
+    type="button"
+    class="service-save-button"
+    onclick="createVenueMaster()"
+  >
+    会場を追加
+  </button>
+
+  <div
+    id="venueMasterSaveResult"
+    class="service-create-result"
+  ></div>
+
+</div>
+
   <div
     id="venueMasterList"
     class="status"
@@ -3269,6 +3314,157 @@ function showReceiptQr(
     list.textContent =
       "会場マスターの取得中にエラーが発生しました。\n" +
       err.message;
+
+  }
+}
+
+    async function createVenueMaster() {
+
+  const nameInput =
+    document.getElementById(
+      "venueMasterName"
+    );
+
+  const orderInput =
+    document.getElementById(
+      "venueMasterOrder"
+    );
+
+  const result =
+    document.getElementById(
+      "venueMasterSaveResult"
+    );
+
+
+  const venueName =
+    nameInput
+      ? nameInput.value.trim()
+      : "";
+
+  const displayOrder =
+    orderInput
+      ? Number(
+          orderInput.value || 0
+        )
+      : 0;
+
+
+  if (!venueName) {
+
+    if (result) {
+      result.textContent =
+        "会場名を入力してください。";
+    }
+
+    return;
+  }
+
+
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+
+    if (result) {
+      result.textContent =
+        "運営者情報を取得できませんでした。";
+    }
+
+    return;
+  }
+
+
+  if (result) {
+    result.textContent =
+      "保存中...";
+  }
+
+
+  try {
+
+    const res =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            new URLSearchParams({
+
+              action:
+                "saveVenueMaster",
+
+              adminUserId:
+                currentProfile.userId,
+
+              venueId:
+                "",
+
+              venueName:
+                venueName,
+
+              displayOrder:
+                String(
+                  displayOrder
+                ),
+
+              active:
+                "TRUE"
+
+            })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      !data ||
+      !data.ok
+    ) {
+
+      if (result) {
+        result.textContent =
+          "保存できませんでした。\n" +
+          (
+            data &&
+            data.message
+              ? data.message
+              : ""
+          );
+      }
+
+      return;
+    }
+
+
+    if (nameInput) {
+      nameInput.value = "";
+    }
+
+    if (orderInput) {
+      orderInput.value = "0";
+    }
+
+
+    if (result) {
+      result.textContent =
+        "会場を追加しました。";
+    }
+
+
+    await openVenueMaster();
+
+
+  } catch (err) {
+
+    if (result) {
+      result.textContent =
+        "保存中にエラーが発生しました。\n" +
+        err.message;
+    }
 
   }
 }
