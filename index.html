@@ -666,8 +666,69 @@
         <h2>Reservation</h2>
         <div id="reservationList" class="status">読み込み前です。</div>
       </div>
+
+      <div
+  id="settingsManagement"
+  class="panel"
+>
+  <h2>Settings</h2>
+
+  <div class="menu">
+
+    <button
+      id="venueMasterButton"
+      type="button"
+      onclick="openVenueMaster()"
+      style="display:none;"
+    >
+      会場マスター
+    </button>
+
+    <button
+      id="programMasterButton"
+      type="button"
+      onclick="openProgramMaster()"
+      style="display:none;"
+    >
+      プログラムマスター
+    </button>
+
+    <button
+      id="venueProgramMasterButton"
+      type="button"
+      onclick="openVenueProgramMaster()"
+      style="display:none;"
+    >
+      会場プログラムマスター
+    </button>
+
+  </div>
+</div>
+      
     </div>
 
+    <div
+  id="venueMaster"
+  class="panel"
+>
+  <h2>Venue</h2>
+
+  <button
+    type="button"
+    class="back-button"
+    onclick="openSettingsManagement()"
+  >
+    管理設定に戻る
+  </button>
+
+  <div
+    id="venueMasterList"
+    class="status"
+  >
+    読み込み前です。
+  </div>
+</div>
+    
     <div
   id="serviceManagement"
   class="panel"
@@ -3007,6 +3068,209 @@ function showReceiptQr(
       </div>
     </div>
   `;
+}
+
+    function openSettingsManagement() {
+
+  showPanel(
+    "settingsManagement"
+  );
+
+  const permissions =
+    reservationPreloadData &&
+    reservationPreloadData.permissions
+      ? reservationPreloadData.permissions
+      : {};
+
+
+  const venueMasterButton =
+    document.getElementById(
+      "venueMasterButton"
+    );
+
+  const programMasterButton =
+    document.getElementById(
+      "programMasterButton"
+    );
+
+  const venueProgramMasterButton =
+    document.getElementById(
+      "venueProgramMasterButton"
+    );
+
+
+  if (venueMasterButton) {
+    venueMasterButton.style.display =
+      permissions.manageVenue
+        ? ""
+        : "none";
+  }
+
+
+  if (programMasterButton) {
+    programMasterButton.style.display =
+      permissions.manageProgram
+        ? ""
+        : "none";
+  }
+
+
+  if (venueProgramMasterButton) {
+    venueProgramMasterButton.style.display =
+      permissions.manageVenueProgram
+        ? ""
+        : "none";
+  }
+}
+
+    async function openVenueMaster() {
+
+  showPanel(
+    "venueMaster"
+  );
+
+  const list =
+    document.getElementById(
+      "venueMasterList"
+    );
+
+  if (!list) {
+    return;
+  }
+
+  list.className =
+    "status";
+
+  list.textContent =
+    "会場マスターを読み込み中...";
+
+
+  try {
+
+    const res =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            new URLSearchParams({
+
+              action:
+                "getVenueMasterData",
+
+              adminUserId:
+                currentProfile.userId
+
+            })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      !data ||
+      !data.ok
+    ) {
+
+      list.className =
+        "status";
+
+      list.textContent =
+        "会場マスターを取得できませんでした。\n" +
+        (
+          data &&
+          data.message
+            ? data.message
+            : ""
+        );
+
+      return;
+    }
+
+
+    const venues =
+      Array.isArray(
+        data.venues
+      )
+        ? data.venues
+        : [];
+
+
+    if (
+      venues.length === 0
+    ) {
+
+      list.className =
+        "status";
+
+      list.textContent =
+        "登録されている会場がありません。";
+
+      return;
+    }
+
+
+    let html =
+      `<div class="summary-list">`;
+
+
+    venues.forEach(
+      function(venue) {
+
+        html += `
+          <div class="summary-card">
+            <div class="service-name">
+              ${escapeHtml(
+                venue.venueName || ""
+              )}
+            </div>
+
+            <div class="small">
+              会場ID：
+              ${escapeHtml(
+                venue.venueId || ""
+              )}
+            </div>
+
+            <div class="small">
+              表示順：
+              ${escapeHtml(
+                String(
+                  venue.displayOrder || 0
+                )
+              )}
+            </div>
+          </div>
+        `;
+      }
+    );
+
+
+    html +=
+      `</div>`;
+
+
+    list.className =
+      "";
+
+    list.innerHTML =
+      html;
+
+
+  } catch (err) {
+
+    list.className =
+      "status";
+
+    list.textContent =
+      "会場マスターの取得中にエラーが発生しました。\n" +
+      err.message;
+
+  }
 }
 
     function openServiceManagement() {
