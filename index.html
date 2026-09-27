@@ -3259,69 +3259,72 @@ function showReceiptQr(
     }
 
 
-    let html =
-      `<div class="summary-list">`;
+   let html =
+  `<div class="summary-list">`;
 
+venues.forEach(
+  function(venue) {
 
     html += `
-  <div class="summary-card">
+      <div class="summary-card">
 
-    <div class="service-name">
-      ${escapeHtml(
-        venue.venueName || ""
-      )}
-    </div>
+        <div class="service-name">
+          ${escapeHtml(
+            venue.venueName || ""
+          )}
+        </div>
 
-    <div class="small">
-      会場ID：
-      ${escapeHtml(
-        venue.venueId || ""
-      )}
-    </div>
+        <div class="small">
+          会場ID：
+          ${escapeHtml(
+            venue.venueId || ""
+          )}
+        </div>
 
-    <div class="small">
-      表示順：
-      ${escapeHtml(
-        String(
-          venue.displayOrder || 0
-        )
-      )}
-    </div>
+        <div class="small">
+          表示順：
+          ${escapeHtml(
+            String(
+              venue.displayOrder || 0
+            )
+          )}
+        </div>
 
-    <div class="small">
-  状態：
-  ${
-    venue.active === false
-      ? "無効"
-      : "有効"
+        <div class="small">
+          状態：
+          ${
+            venue.active === false
+              ? "無効"
+              : "有効"
+          }
+        </div>
+
+        <button
+          type="button"
+          class="edit-reservation-button"
+          onclick="openVenueMasterEdit(
+            '${escapeJs(
+              venue.venueId || ""
+            )}',
+            '${escapeJs(
+              venue.venueName || ""
+            )}',
+            ${Number(
+              venue.displayOrder || 0
+            )},
+            ${venue.active === false ? "false" : "true"}
+          )"
+        >
+          編集
+        </button>
+
+      </div>
+    `;
   }
-</div>
+);
 
-   <button
-  type="button"
-  class="edit-reservation-button"
-  onclick="openVenueMasterEdit(
-    '${escapeJs(
-      venue.venueId || ""
-    )}',
-    '${escapeJs(
-      venue.venueName || ""
-    )}',
-    ${Number(
-      venue.displayOrder || 0
-    )},
-    ${venue.active === false ? "false" : "true"}
-  )"
->
-  編集
-</button>
-
-  </div>
-`;
-
-
-    html +=
-      `</div>`;
+html +=
+  `</div>`;
 
 
     list.className =
