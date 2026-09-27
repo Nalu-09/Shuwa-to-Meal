@@ -662,6 +662,116 @@
 </button>
 </div>
 
+           <div
+  id="venueProgramMaster"
+  class="panel"
+>
+  <h2>Venue Program</h2>
+
+  <button
+    type="button"
+    class="back-button"
+    onclick="openSettingsManagement()"
+  >
+    管理設定に戻る
+  </button>
+
+
+  <div class="service-management-section">
+
+    <div class="service-management-title">
+      会場プログラムを追加
+    </div>
+
+
+    <label class="form-label">
+      会場
+    </label>
+
+    <select
+      id="venueProgramVenue"
+      class="service-form-control"
+    >
+      <option value="">
+        会場を選択
+      </option>
+    </select>
+
+
+    <label class="form-label">
+      プログラム
+    </label>
+
+    <select
+      id="venueProgramProgram"
+      class="service-form-control"
+    >
+      <option value="">
+        プログラムを選択
+      </option>
+    </select>
+
+
+    <label class="form-label">
+      開始時間
+    </label>
+
+    <input
+      type="time"
+      id="venueProgramStartTime"
+      class="service-form-control"
+    >
+
+
+    <label class="form-label">
+      終了時間
+    </label>
+
+    <input
+      type="time"
+      id="venueProgramEndTime"
+      class="service-form-control"
+    >
+
+
+    <label class="form-label">
+      基本定員
+    </label>
+
+    <input
+      type="number"
+      id="venueProgramCapacity"
+      class="service-form-control"
+      min="0"
+      value="0"
+    >
+
+
+    <button
+      type="button"
+      class="service-save-button"
+      onclick="createVenueProgramMaster()"
+    >
+      会場プログラムを追加
+    </button>
+
+
+    <div
+      id="venueProgramSaveResult"
+      class="service-create-result"
+    ></div>
+
+  </div>
+
+
+  <div
+    id="venueProgramMasterList"
+    class="status"
+  >
+    読み込み前です。
+  </div>
+</div>
+
       <div id="reservation" class="panel">
         <h2>Reservation</h2>
         <div id="reservationList" class="status">読み込み前です。</div>
@@ -874,118 +984,9 @@
   class="panel"
 >
 
-      <div
-  id="venueProgramMaster"
-  class="panel"
->
-  <h2>Venue Program</h2>
-
-  <button
-    type="button"
-    class="back-button"
-    onclick="openSettingsManagement()"
-  >
-    管理設定に戻る
-  </button>
-
-
-  <div class="service-management-section">
-
-    <div class="service-management-title">
-      会場プログラムを追加
-    </div>
-
-
-    <label class="form-label">
-      会場
-    </label>
-
-    <select
-      id="venueProgramVenue"
-      class="service-form-control"
-    >
-      <option value="">
-        会場を選択
-      </option>
-    </select>
-
-
-    <label class="form-label">
-      プログラム
-    </label>
-
-    <select
-      id="venueProgramProgram"
-      class="service-form-control"
-    >
-      <option value="">
-        プログラムを選択
-      </option>
-    </select>
-
-
-    <label class="form-label">
-      開始時間
-    </label>
-
-    <input
-      type="time"
-      id="venueProgramStartTime"
-      class="service-form-control"
-    >
-
-
-    <label class="form-label">
-      終了時間
-    </label>
-
-    <input
-      type="time"
-      id="venueProgramEndTime"
-      class="service-form-control"
-    >
-
-
-    <label class="form-label">
-      基本定員
-    </label>
-
-    <input
-      type="number"
-      id="venueProgramCapacity"
-      class="service-form-control"
-      min="0"
-      value="0"
-    >
-
-
-    <button
-      type="button"
-      class="service-save-button"
-      onclick="createVenueProgramMaster()"
-    >
-      会場プログラムを追加
-    </button>
-
-
-    <div
-      id="venueProgramSaveResult"
-      class="service-create-result"
-    ></div>
-
-  </div>
-
-
-  <div
-    id="venueProgramMasterList"
-    class="status"
-  >
-    読み込み前です。
-  </div>
-</div>
-
   <h2>Schedule</h2>
 
+      
 
   <!-- =========================
        新規予約枠
