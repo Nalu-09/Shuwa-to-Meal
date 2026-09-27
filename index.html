@@ -3263,36 +3263,61 @@ function showReceiptQr(
       `<div class="summary-list">`;
 
 
-    venues.forEach(
-      function(venue) {
+    html += `
+  <div class="summary-card">
 
-        html += `
-          <div class="summary-card">
-            <div class="service-name">
-              ${escapeHtml(
-                venue.venueName || ""
-              )}
-            </div>
+    <div class="service-name">
+      ${escapeHtml(
+        venue.venueName || ""
+      )}
+    </div>
 
-            <div class="small">
-              会場ID：
-              ${escapeHtml(
-                venue.venueId || ""
-              )}
-            </div>
+    <div class="small">
+      会場ID：
+      ${escapeHtml(
+        venue.venueId || ""
+      )}
+    </div>
 
-            <div class="small">
-              表示順：
-              ${escapeHtml(
-                String(
-                  venue.displayOrder || 0
-                )
-              )}
-            </div>
-          </div>
-        `;
-      }
-    );
+    <div class="small">
+      表示順：
+      ${escapeHtml(
+        String(
+          venue.displayOrder || 0
+        )
+      )}
+    </div>
+
+    <div class="small">
+  状態：
+  ${
+    venue.active === false
+      ? "無効"
+      : "有効"
+  }
+</div>
+
+   <button
+  type="button"
+  class="edit-reservation-button"
+  onclick="openVenueMasterEdit(
+    '${escapeJs(
+      venue.venueId || ""
+    )}',
+    '${escapeJs(
+      venue.venueName || ""
+    )}',
+    ${Number(
+      venue.displayOrder || 0
+    )},
+    ${venue.active === false ? "false" : "true"}
+  )"
+>
+  編集
+</button>
+
+  </div>
+`;
 
 
     html +=
@@ -3452,6 +3477,283 @@ function showReceiptQr(
     if (result) {
       result.textContent =
         "会場を追加しました。";
+    }
+
+
+    await openVenueMaster();
+
+
+  } catch (err) {
+
+    if (result) {
+      result.textContent =
+        "保存中にエラーが発生しました。\n" +
+        err.message;
+    }
+
+  }
+}
+
+   function openVenueMasterEdit(
+  venueId,
+  venueName,
+  displayOrder,
+  active
+) {
+
+  const list =
+    document.getElementById(
+      "venueMasterList"
+    );
+
+  if (!list) {
+    return;
+  }
+
+
+  list.innerHTML = `
+    <div class="service-management-section">
+
+      <div class="service-management-title">
+        会場を編集
+      </div>
+
+
+      <div class="small">
+        会場ID：
+        ${escapeHtml(
+          venueId || ""
+        )}
+      </div>
+
+
+      <label class="form-label">
+        会場名
+      </label>
+
+      <input
+        type="text"
+        id="venueEditName"
+        class="service-form-control"
+        value="${escapeHtml(
+          venueName || ""
+        )}"
+      >
+
+
+      <label class="form-label">
+        表示順
+      </label>
+
+      <input
+        type="number"
+        id="venueEditOrder"
+        class="service-form-control"
+        min="0"
+        value="${Number(
+          displayOrder || 0
+        )}"
+      >
+
+
+      <label class="form-label">
+        状態
+      </label>
+
+      <select
+        id="venueEditActive"
+        class="service-form-control"
+      >
+        <option value="TRUE">
+          有効
+        </option>
+
+        <option value="FALSE">
+          無効
+        </option>
+      </select>
+
+
+      <button
+        type="button"
+        class="service-save-button"
+        onclick="saveVenueMasterEdit(
+          '${escapeJs(
+            venueId || ""
+          )}'
+        )"
+      >
+        変更を保存
+      </button>
+
+
+      <button
+        type="button"
+        class="edit-reservation-button"
+        onclick="openVenueMaster()"
+      >
+        キャンセル
+      </button>
+
+
+      <div
+        id="venueEditResult"
+        class="service-create-result"
+      ></div>
+
+    </div>
+  `;
+
+     const activeSelect =
+  document.getElementById(
+    "venueEditActive"
+  );
+
+if (activeSelect) {
+  activeSelect.value =
+    active === false
+      ? "FALSE"
+      : "TRUE";
+}
+}
+
+    async function saveVenueMasterEdit(
+  venueId
+) {
+
+  const nameInput =
+    document.getElementById(
+      "venueEditName"
+    );
+
+  const orderInput =
+    document.getElementById(
+      "venueEditOrder"
+    );
+
+  const activeInput =
+    document.getElementById(
+      "venueEditActive"
+    );
+
+  const result =
+    document.getElementById(
+      "venueEditResult"
+    );
+
+
+  const venueName =
+    nameInput
+      ? nameInput.value.trim()
+      : "";
+
+  const displayOrder =
+    orderInput
+      ? Number(
+          orderInput.value || 0
+        )
+      : 0;
+
+  const active =
+    activeInput
+      ? activeInput.value
+      : "TRUE";
+
+
+  if (!venueName) {
+
+    if (result) {
+      result.textContent =
+        "会場名を入力してください。";
+    }
+
+    return;
+  }
+
+
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+
+    if (result) {
+      result.textContent =
+        "運営者情報を取得できませんでした。";
+    }
+
+    return;
+  }
+
+
+  if (result) {
+    result.textContent =
+      "保存中...";
+  }
+
+
+  try {
+
+    const res =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            new URLSearchParams({
+
+              action:
+                "saveVenueMaster",
+
+              adminUserId:
+                currentProfile.userId,
+
+              venueId:
+                venueId,
+
+              venueName:
+                venueName,
+
+              displayOrder:
+                String(
+                  displayOrder
+                ),
+
+              active:
+                active
+
+            })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      !data ||
+      !data.ok
+    ) {
+
+      if (result) {
+        result.textContent =
+          "保存できませんでした。\n" +
+          (
+            data &&
+            data.message
+              ? data.message
+              : ""
+          );
+      }
+
+      return;
+    }
+
+
+    if (result) {
+      result.textContent =
+        "変更を保存しました。";
     }
 
 
