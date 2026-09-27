@@ -773,6 +773,101 @@
     読み込み前です。
   </div>
 </div>
+
+    <div
+  id="programMaster"
+  class="panel"
+>
+  <h2>Program</h2>
+
+  <button
+    type="button"
+    class="back-button"
+    onclick="openSettingsManagement()"
+  >
+    管理設定に戻る
+  </button>
+
+
+  <div class="service-management-section">
+
+    <div class="service-management-title">
+      プログラムを追加
+    </div>
+
+
+    <label class="form-label">
+      プログラム名
+    </label>
+
+    <input
+      type="text"
+      id="programMasterName"
+      class="service-form-control"
+    >
+
+
+    <label class="form-label">
+      基本料金
+    </label>
+
+    <input
+      type="number"
+      id="programMasterPrice"
+      class="service-form-control"
+      min="0"
+      value="0"
+    >
+
+
+    <label class="form-label">
+      説明
+    </label>
+
+    <textarea
+      id="programMasterDescription"
+      class="service-form-control"
+      rows="3"
+    ></textarea>
+
+
+    <label class="form-label">
+      表示順
+    </label>
+
+    <input
+      type="number"
+      id="programMasterOrder"
+      class="service-form-control"
+      min="0"
+      value="0"
+    >
+
+
+    <button
+      type="button"
+      class="service-save-button"
+      onclick="createProgramMaster()"
+    >
+      プログラムを追加
+    </button>
+
+
+    <div
+      id="programMasterSaveResult"
+      class="service-create-result"
+    ></div>
+
+  </div>
+
+
+  <div
+    id="programMasterList"
+    class="status"
+  >
+    読み込み前です。
+  </div>
+</div>
     
     <div
   id="serviceManagement"
@@ -3341,6 +3436,183 @@ html +=
 
     list.textContent =
       "会場マスターの取得中にエラーが発生しました。\n" +
+      err.message;
+
+  }
+}
+
+    async function openProgramMaster() {
+
+  showPanel(
+    "programMaster"
+  );
+
+  const list =
+    document.getElementById(
+      "programMasterList"
+    );
+
+  if (!list) {
+    return;
+  }
+
+  list.className =
+    "status";
+
+  list.textContent =
+    "プログラムマスターを読み込み中...";
+
+
+  try {
+
+    const res =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            new URLSearchParams({
+
+              action:
+                "getProgramMasterData",
+
+              adminUserId:
+                currentProfile.userId
+
+            })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      !data ||
+      !data.ok
+    ) {
+
+      list.className =
+        "status";
+
+      list.textContent =
+        "プログラムマスターを取得できませんでした。\n" +
+        (
+          data &&
+          data.message
+            ? data.message
+            : ""
+        );
+
+      return;
+    }
+
+
+    const programs =
+      Array.isArray(
+        data.programs
+      )
+        ? data.programs
+        : [];
+
+
+    if (
+      programs.length === 0
+    ) {
+
+      list.className =
+        "status";
+
+      list.textContent =
+        "登録されているプログラムがありません。";
+
+      return;
+    }
+
+
+    let html =
+      `<div class="summary-list">`;
+
+
+    programs.forEach(
+      function(program) {
+
+        html += `
+          <div class="summary-card">
+
+            <div class="service-name">
+              ${escapeHtml(
+                program.programName || ""
+              )}
+            </div>
+
+            <div class="small">
+              プログラムID：
+              ${escapeHtml(
+                program.programId || ""
+              )}
+            </div>
+
+            <div class="small">
+              基本料金：
+              ${escapeHtml(
+                String(
+                  program.defaultPrice || 0
+                )
+              )}円
+            </div>
+
+            <div class="small">
+              説明：
+              ${escapeHtml(
+                program.description || ""
+              )}
+            </div>
+
+            <div class="small">
+              表示順：
+              ${escapeHtml(
+                String(
+                  program.displayOrder || 0
+                )
+              )}
+            </div>
+
+            <div class="small">
+              状態：
+              ${
+                program.active === false
+                  ? "無効"
+                  : "有効"
+              }
+            </div>
+
+          </div>
+        `;
+      }
+    );
+
+
+    html +=
+      `</div>`;
+
+
+    list.className =
+      "";
+
+    list.innerHTML =
+      html;
+
+
+  } catch (err) {
+
+    list.className =
+      "status";
+
+    list.textContent =
+      "プログラムマスターの取得中にエラーが発生しました。\n" +
       err.message;
 
   }
