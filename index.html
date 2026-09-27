@@ -3395,6 +3395,31 @@ venues.forEach(
         </div>
 
         <button
+  type="button"
+  class="edit-reservation-button"
+  onclick="openProgramMasterEdit(
+    '${escapeJs(
+      program.programId || ""
+    )}',
+    '${escapeJs(
+      program.programName || ""
+    )}',
+    ${Number(
+      program.defaultPrice || 0
+    )},
+    '${escapeJs(
+      program.description || ""
+    )}',
+    ${Number(
+      program.displayOrder || 0
+    )},
+    ${program.active === false ? "false" : "true"}
+  )"
+>
+  編集
+</button>
+
+        <button
           type="button"
           class="edit-reservation-button"
           onclick="openVenueMasterEdit(
@@ -3614,6 +3639,533 @@ html +=
     list.textContent =
       "プログラムマスターの取得中にエラーが発生しました。\n" +
       err.message;
+
+  }
+}
+
+    async function createProgramMaster() {
+
+  const nameInput =
+    document.getElementById(
+      "programMasterName"
+    );
+
+  const priceInput =
+    document.getElementById(
+      "programMasterPrice"
+    );
+
+  const descriptionInput =
+    document.getElementById(
+      "programMasterDescription"
+    );
+
+  const orderInput =
+    document.getElementById(
+      "programMasterOrder"
+    );
+
+  const result =
+    document.getElementById(
+      "programMasterSaveResult"
+    );
+
+
+  const programName =
+    nameInput
+      ? nameInput.value.trim()
+      : "";
+
+  const defaultPrice =
+    priceInput
+      ? Number(
+          priceInput.value || 0
+        )
+      : 0;
+
+  const description =
+    descriptionInput
+      ? descriptionInput.value.trim()
+      : "";
+
+  const displayOrder =
+    orderInput
+      ? Number(
+          orderInput.value || 0
+        )
+      : 0;
+
+
+  if (!programName) {
+
+    if (result) {
+      result.textContent =
+        "プログラム名を入力してください。";
+    }
+
+    return;
+  }
+
+
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+
+    if (result) {
+      result.textContent =
+        "運営者情報を取得できませんでした。";
+    }
+
+    return;
+  }
+
+
+  if (result) {
+    result.textContent =
+      "保存中...";
+  }
+
+
+  try {
+
+    const res =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            new URLSearchParams({
+
+              action:
+                "saveProgramMaster",
+
+              adminUserId:
+                currentProfile.userId,
+
+              programId:
+                "",
+
+              programName:
+                programName,
+
+              defaultPrice:
+                String(
+                  defaultPrice
+                ),
+
+              description:
+                description,
+
+              displayOrder:
+                String(
+                  displayOrder
+                ),
+
+              active:
+                "TRUE"
+
+            })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      !data ||
+      !data.ok
+    ) {
+
+      if (result) {
+        result.textContent =
+          "保存できませんでした。\n" +
+          (
+            data &&
+            data.message
+              ? data.message
+              : ""
+          );
+      }
+
+      return;
+    }
+
+
+    if (nameInput) {
+      nameInput.value = "";
+    }
+
+    if (priceInput) {
+      priceInput.value = "0";
+    }
+
+    if (descriptionInput) {
+      descriptionInput.value = "";
+    }
+
+    if (orderInput) {
+      orderInput.value = "0";
+    }
+
+
+    if (result) {
+      result.textContent =
+        "プログラムを追加しました。";
+    }
+
+
+    await openProgramMaster();
+
+
+  } catch (err) {
+
+    if (result) {
+      result.textContent =
+        "保存中にエラーが発生しました。\n" +
+        err.message;
+    }
+
+  }
+}
+
+    function openProgramMasterEdit(
+  programId,
+  programName,
+  defaultPrice,
+  description,
+  displayOrder,
+  active
+) {
+
+  const list =
+    document.getElementById(
+      "programMasterList"
+    );
+
+  if (!list) {
+    return;
+  }
+
+
+  list.innerHTML = `
+    <div class="service-management-section">
+
+      <div class="service-management-title">
+        プログラムを編集
+      </div>
+
+
+      <div class="small">
+        プログラムID：
+        ${escapeHtml(
+          programId || ""
+        )}
+      </div>
+
+
+      <label class="form-label">
+        プログラム名
+      </label>
+
+      <input
+        type="text"
+        id="programEditName"
+        class="service-form-control"
+        value="${escapeHtml(
+          programName || ""
+        )}"
+      >
+
+
+      <label class="form-label">
+        基本料金
+      </label>
+
+      <input
+        type="number"
+        id="programEditPrice"
+        class="service-form-control"
+        min="0"
+        value="${Number(
+          defaultPrice || 0
+        )}"
+      >
+
+
+      <label class="form-label">
+        説明
+      </label>
+
+      <textarea
+        id="programEditDescription"
+        class="service-form-control"
+        rows="3"
+      >${escapeHtml(
+        description || ""
+      )}</textarea>
+
+
+      <label class="form-label">
+        表示順
+      </label>
+
+      <input
+        type="number"
+        id="programEditOrder"
+        class="service-form-control"
+        min="0"
+        value="${Number(
+          displayOrder || 0
+        )}"
+      >
+
+
+      <label class="form-label">
+        状態
+      </label>
+
+      <select
+        id="programEditActive"
+        class="service-form-control"
+      >
+        <option value="TRUE">
+          有効
+        </option>
+
+        <option value="FALSE">
+          無効
+        </option>
+      </select>
+
+
+      <button
+        type="button"
+        class="service-save-button"
+        onclick="saveProgramMasterEdit(
+          '${escapeJs(
+            programId || ""
+          )}'
+        )"
+      >
+        変更を保存
+      </button>
+
+
+      <button
+        type="button"
+        class="edit-reservation-button"
+        onclick="openProgramMaster()"
+      >
+        キャンセル
+      </button>
+
+
+      <div
+        id="programEditResult"
+        class="service-create-result"
+      ></div>
+
+    </div>
+  `;
+
+
+  const activeSelect =
+    document.getElementById(
+      "programEditActive"
+    );
+
+  if (activeSelect) {
+    activeSelect.value =
+      active === false
+        ? "FALSE"
+        : "TRUE";
+  }
+}
+
+    async function saveProgramMasterEdit(
+  programId
+) {
+
+  const nameInput =
+    document.getElementById(
+      "programEditName"
+    );
+
+  const priceInput =
+    document.getElementById(
+      "programEditPrice"
+    );
+
+  const descriptionInput =
+    document.getElementById(
+      "programEditDescription"
+    );
+
+  const orderInput =
+    document.getElementById(
+      "programEditOrder"
+    );
+
+  const activeInput =
+    document.getElementById(
+      "programEditActive"
+    );
+
+  const result =
+    document.getElementById(
+      "programEditResult"
+    );
+
+
+  const programName =
+    nameInput
+      ? nameInput.value.trim()
+      : "";
+
+  const defaultPrice =
+    priceInput
+      ? Number(
+          priceInput.value || 0
+        )
+      : 0;
+
+  const description =
+    descriptionInput
+      ? descriptionInput.value.trim()
+      : "";
+
+  const displayOrder =
+    orderInput
+      ? Number(
+          orderInput.value || 0
+        )
+      : 0;
+
+  const active =
+    activeInput
+      ? activeInput.value
+      : "TRUE";
+
+
+  if (!programName) {
+
+    if (result) {
+      result.textContent =
+        "プログラム名を入力してください。";
+    }
+
+    return;
+  }
+
+
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+
+    if (result) {
+      result.textContent =
+        "運営者情報を取得できませんでした。";
+    }
+
+    return;
+  }
+
+
+  if (result) {
+    result.textContent =
+      "保存中...";
+  }
+
+
+  try {
+
+    const res =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            new URLSearchParams({
+
+              action:
+                "saveProgramMaster",
+
+              adminUserId:
+                currentProfile.userId,
+
+              programId:
+                programId,
+
+              programName:
+                programName,
+
+              defaultPrice:
+                String(
+                  defaultPrice
+                ),
+
+              description:
+                description,
+
+              displayOrder:
+                String(
+                  displayOrder
+                ),
+
+              active:
+                active
+
+            })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      !data ||
+      !data.ok
+    ) {
+
+      if (result) {
+        result.textContent =
+          "保存できませんでした。\n" +
+          (
+            data &&
+            data.message
+              ? data.message
+              : ""
+          );
+      }
+
+      return;
+    }
+
+
+    if (result) {
+      result.textContent =
+        "変更を保存しました。";
+    }
+
+
+    await openProgramMaster();
+
+
+  } catch (err) {
+
+    if (result) {
+      result.textContent =
+        "保存中にエラーが発生しました。\n" +
+        err.message;
+    }
 
   }
 }
