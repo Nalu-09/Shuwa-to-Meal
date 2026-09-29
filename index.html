@@ -1038,29 +1038,37 @@
     </label>
 
     <select
-      id="staffMasterRole"
-      class="service-form-control"
-    >
-      <option value="">
-        権限を選択
-      </option>
+  id="staffMasterRole"
+  class="service-form-control"
+>
+  <option value="">
+    権限を選択
+  </option>
 
-      <option value="代表">
-        代表
-      </option>
+  <option value="申請">
+    申請
+  </option>
 
-      <option value="運営">
-        運営
-      </option>
+  <option value="代表">
+    代表
+  </option>
 
-      <option value="運営補助">
-        運営補助
-      </option>
+  <option value="運営">
+    運営
+  </option>
 
-      <option value="調理補助">
-        調理補助
-      </option>
-    </select>
+  <option value="運営補助">
+    運営補助
+  </option>
+
+  <option value="調理補助">
+    調理補助
+  </option>
+
+  <option value="却下">
+    却下
+  </option>
+</select>
 
 
     <label class="form-label">
@@ -1179,6 +1187,80 @@
     class="status"
   >
     読み込み前です。
+  </div>
+
+</div>
+
+    <div
+  id="staffApplication"
+  class="panel"
+>
+  <h2>Staff Application</h2>
+
+
+  <div class="service-management-section">
+
+    <div class="service-management-title">
+      スタッフ登録申請
+    </div>
+
+
+    <div class="small">
+      スタッフとして登録するための申請フォームです。
+    </div>
+
+
+    <label class="form-label">
+      LINE表示名
+    </label>
+
+    <input
+      type="text"
+      id="staffApplicationLineName"
+      class="service-form-control"
+      readonly
+    >
+
+
+    <label class="form-label">
+      氏名
+    </label>
+
+    <input
+      type="text"
+      id="staffApplicationName"
+      class="service-form-control"
+      autocomplete="name"
+    >
+
+
+    <label class="form-label">
+      メールアドレス
+    </label>
+
+    <input
+      type="email"
+      id="staffApplicationEmail"
+      class="service-form-control"
+      autocomplete="email"
+    >
+
+
+    <button
+      type="button"
+      id="staffApplicationSubmitButton"
+      class="service-save-button"
+      onclick="submitStaffApplication()"
+    >
+      登録を申請
+    </button>
+
+
+    <div
+      id="staffApplicationResult"
+      class="service-create-result"
+    ></div>
+
   </div>
 
 </div>
@@ -1428,6 +1510,30 @@ settingsManagementButton.style.visibility =
      */
     currentProfile =
       await liff.getProfile();
+
+    const urlParams =
+  new URLSearchParams(
+    window.location.search
+  );
+
+const pageMode =
+  urlParams.get(
+    "mode"
+  );
+
+
+if (
+  pageMode ===
+  "staff-application"
+) {
+
+  pageStatus.textContent =
+    "";
+
+  openStaffApplication();
+
+  return;
+}
 
 
     /*
@@ -4175,6 +4281,38 @@ html +=
               )}
             </div>
 
+            <button
+  type="button"
+  class="edit-reservation-button"
+  onclick="openStaffMasterEdit(
+    '${escapeJs(
+      staff.staffId || ""
+    )}',
+    '${escapeJs(
+      staff.lineUserId || ""
+    )}',
+    '${escapeJs(
+      staff.name || ""
+    )}',
+    '${escapeJs(
+      staff.role || ""
+    )}',
+    ${staff.active === false ? "false" : "true"},
+    '${escapeJs(
+      staff.email || ""
+    )}',
+    ${staff.reservationNotification ? "true" : "false"},
+    ${staff.manageVenue ? "true" : "false"},
+    ${staff.manageProgram ? "true" : "false"},
+    ${staff.manageVenueProgram ? "true" : "false"},
+    '${escapeJs(
+      staff.note || ""
+    )}'
+  )"
+>
+  編集
+</button>
+
           </div>
         `;
       }
@@ -4204,6 +4342,1171 @@ html +=
   }
 }
 
+    async function createStaffMaster() {
+
+  const lineUserIdInput =
+    document.getElementById(
+      "staffMasterLineUserId"
+    );
+
+  const nameInput =
+    document.getElementById(
+      "staffMasterName"
+    );
+
+  const roleInput =
+    document.getElementById(
+      "staffMasterRole"
+    );
+
+  const emailInput =
+    document.getElementById(
+      "staffMasterEmail"
+    );
+
+  const notificationInput =
+    document.getElementById(
+      "staffMasterNotification"
+    );
+
+  const manageVenueInput =
+    document.getElementById(
+      "staffMasterManageVenue"
+    );
+
+  const manageProgramInput =
+    document.getElementById(
+      "staffMasterManageProgram"
+    );
+
+  const manageVenueProgramInput =
+    document.getElementById(
+      "staffMasterManageVenueProgram"
+    );
+
+  const noteInput =
+    document.getElementById(
+      "staffMasterNote"
+    );
+
+  const result =
+    document.getElementById(
+      "staffMasterSaveResult"
+    );
+
+
+  const lineUserId =
+    lineUserIdInput
+      ? lineUserIdInput.value.trim()
+      : "";
+
+  const name =
+    nameInput
+      ? nameInput.value.trim()
+      : "";
+
+  const role =
+    roleInput
+      ? roleInput.value
+      : "";
+
+  const email =
+    emailInput
+      ? emailInput.value.trim()
+      : "";
+
+  const reservationNotification =
+    notificationInput
+      ? notificationInput.value
+      : "FALSE";
+
+  const manageVenue =
+    manageVenueInput
+      ? manageVenueInput.value
+      : "FALSE";
+
+  const manageProgram =
+    manageProgramInput
+      ? manageProgramInput.value
+      : "FALSE";
+
+  const manageVenueProgram =
+    manageVenueProgramInput
+      ? manageVenueProgramInput.value
+      : "FALSE";
+
+  const note =
+    noteInput
+      ? noteInput.value.trim()
+      : "";
+
+
+  if (!lineUserId) {
+
+    if (result) {
+      result.textContent =
+        "LINEユーザーIDを入力してください。";
+    }
+
+    return;
+  }
+
+
+  if (!name) {
+
+    if (result) {
+      result.textContent =
+        "氏名を入力してください。";
+    }
+
+    return;
+  }
+
+
+  if (!role) {
+
+    if (result) {
+      result.textContent =
+        "権限を選択してください。";
+    }
+
+    return;
+  }
+
+
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+
+    if (result) {
+      result.textContent =
+        "運営者情報を取得できませんでした。";
+    }
+
+    return;
+  }
+
+
+  if (result) {
+    result.textContent =
+      "保存中...";
+  }
+
+
+  try {
+
+    const res =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            new URLSearchParams({
+
+              action:
+                "saveStaffMaster",
+
+              adminUserId:
+                currentProfile.userId,
+
+              staffId:
+                "",
+
+              lineUserId:
+                lineUserId,
+
+              name:
+                name,
+
+              role:
+                role,
+
+              active:
+                role === "申請" ||
+                role === "却下"
+                  ? "FALSE"
+                  : "TRUE",
+
+              email:
+                email,
+
+              reservationNotification:
+                reservationNotification,
+
+              manageVenue:
+                manageVenue,
+
+              manageProgram:
+                manageProgram,
+
+              manageVenueProgram:
+                manageVenueProgram,
+
+              note:
+                note
+
+            })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      !data ||
+      !data.ok
+    ) {
+
+      if (result) {
+
+        let message =
+          data &&
+          data.message
+            ? data.message
+            : "";
+
+
+        if (
+          message ===
+          "line_user_id_already_exists"
+        ) {
+          message =
+            "このLINEユーザーIDはすでに登録されています。";
+        }
+
+
+        result.textContent =
+          "保存できませんでした。\n" +
+          message;
+      }
+
+      return;
+    }
+
+
+    if (lineUserIdInput) {
+      lineUserIdInput.value = "";
+    }
+
+    if (nameInput) {
+      nameInput.value = "";
+    }
+
+    if (roleInput) {
+      roleInput.value = "";
+    }
+
+    if (emailInput) {
+      emailInput.value = "";
+    }
+
+    if (notificationInput) {
+      notificationInput.value =
+        "FALSE";
+    }
+
+    if (manageVenueInput) {
+      manageVenueInput.value =
+        "FALSE";
+    }
+
+    if (manageProgramInput) {
+      manageProgramInput.value =
+        "FALSE";
+    }
+
+    if (
+      manageVenueProgramInput
+    ) {
+      manageVenueProgramInput.value =
+        "FALSE";
+    }
+
+    if (noteInput) {
+      noteInput.value = "";
+    }
+
+
+    if (result) {
+      result.textContent =
+        "スタッフを追加しました。";
+    }
+
+
+    await openStaffMaster();
+
+
+  } catch (err) {
+
+    if (result) {
+      result.textContent =
+        "保存中にエラーが発生しました。\n" +
+        err.message;
+    }
+
+  }
+}
+
+    function openStaffMasterEdit(
+  staffId,
+  lineUserId,
+  name,
+  role,
+  active,
+  email,
+  reservationNotification,
+  manageVenue,
+  manageProgram,
+  manageVenueProgram,
+  note
+) {
+
+  const list =
+    document.getElementById(
+      "staffMasterList"
+    );
+
+  if (!list) {
+    return;
+  }
+
+
+  list.className =
+    "";
+
+  list.innerHTML = `
+    <div class="service-management-section">
+
+      <div class="service-management-title">
+        スタッフを編集
+      </div>
+
+
+      <div class="small">
+        スタッフID：
+        ${escapeHtml(
+          staffId || ""
+        )}
+      </div>
+
+
+      <label class="form-label">
+        LINEユーザーID
+      </label>
+
+      <input
+        type="text"
+        id="staffEditLineUserId"
+        class="service-form-control"
+        value="${escapeHtml(
+          lineUserId || ""
+        )}"
+      >
+
+
+      <label class="form-label">
+        氏名
+      </label>
+
+      <input
+        type="text"
+        id="staffEditName"
+        class="service-form-control"
+        value="${escapeHtml(
+          name || ""
+        )}"
+      >
+
+
+      <label class="form-label">
+        権限
+      </label>
+
+      <select
+        id="staffEditRole"
+        class="service-form-control"
+      >
+        <option value="申請">
+          申請
+        </option>
+
+        <option value="代表">
+          代表
+        </option>
+
+        <option value="運営">
+          運営
+        </option>
+
+        <option value="運営補助">
+          運営補助
+        </option>
+
+        <option value="調理補助">
+          調理補助
+        </option>
+
+        <option value="却下">
+          却下
+        </option>
+      </select>
+
+
+      <label class="form-label">
+        有効
+      </label>
+
+      <select
+        id="staffEditActive"
+        class="service-form-control"
+      >
+        <option value="TRUE">
+          有効
+        </option>
+
+        <option value="FALSE">
+          無効
+        </option>
+      </select>
+
+
+      <label class="form-label">
+        メールアドレス
+      </label>
+
+      <input
+        type="email"
+        id="staffEditEmail"
+        class="service-form-control"
+        value="${escapeHtml(
+          email || ""
+        )}"
+      >
+
+
+      <label class="form-label">
+        予約通知
+      </label>
+
+      <select
+        id="staffEditNotification"
+        class="service-form-control"
+      >
+        <option value="FALSE">
+          通知しない
+        </option>
+
+        <option value="TRUE">
+          通知する
+        </option>
+      </select>
+
+
+      <label class="form-label">
+        会場マスター管理
+      </label>
+
+      <select
+        id="staffEditManageVenue"
+        class="service-form-control"
+      >
+        <option value="FALSE">
+          不可
+        </option>
+
+        <option value="TRUE">
+          可
+        </option>
+      </select>
+
+
+      <label class="form-label">
+        プログラムマスター管理
+      </label>
+
+      <select
+        id="staffEditManageProgram"
+        class="service-form-control"
+      >
+        <option value="FALSE">
+          不可
+        </option>
+
+        <option value="TRUE">
+          可
+        </option>
+      </select>
+
+
+      <label class="form-label">
+        会場プログラムマスター管理
+      </label>
+
+      <select
+        id="staffEditManageVenueProgram"
+        class="service-form-control"
+      >
+        <option value="FALSE">
+          不可
+        </option>
+
+        <option value="TRUE">
+          可
+        </option>
+      </select>
+
+
+      <label class="form-label">
+        備考
+      </label>
+
+      <textarea
+        id="staffEditNote"
+        class="service-form-control"
+        rows="3"
+      >${escapeHtml(
+        note || ""
+      )}</textarea>
+
+
+      <button
+        type="button"
+        class="service-save-button"
+        onclick="saveStaffMasterEdit(
+          '${escapeJs(
+            staffId || ""
+          )}'
+        )"
+      >
+        変更を保存
+      </button>
+
+
+      <button
+        type="button"
+        class="edit-reservation-button"
+        onclick="openStaffMaster()"
+      >
+        キャンセル
+      </button>
+
+
+      <div
+        id="staffEditResult"
+        class="service-create-result"
+      ></div>
+
+    </div>
+  `;
+
+
+  const roleInput =
+    document.getElementById(
+      "staffEditRole"
+    );
+
+  const activeInput =
+    document.getElementById(
+      "staffEditActive"
+    );
+
+  const notificationInput =
+    document.getElementById(
+      "staffEditNotification"
+    );
+
+  const manageVenueInput =
+    document.getElementById(
+      "staffEditManageVenue"
+    );
+
+  const manageProgramInput =
+    document.getElementById(
+      "staffEditManageProgram"
+    );
+
+  const manageVenueProgramInput =
+    document.getElementById(
+      "staffEditManageVenueProgram"
+    );
+
+
+  if (roleInput) {
+    roleInput.value =
+      role || "申請";
+  }
+
+  if (activeInput) {
+    activeInput.value =
+      active === false
+        ? "FALSE"
+        : "TRUE";
+  }
+
+  if (notificationInput) {
+    notificationInput.value =
+      reservationNotification
+        ? "TRUE"
+        : "FALSE";
+  }
+
+  if (manageVenueInput) {
+    manageVenueInput.value =
+      manageVenue
+        ? "TRUE"
+        : "FALSE";
+  }
+
+  if (manageProgramInput) {
+    manageProgramInput.value =
+      manageProgram
+        ? "TRUE"
+        : "FALSE";
+  }
+
+  if (manageVenueProgramInput) {
+    manageVenueProgramInput.value =
+      manageVenueProgram
+        ? "TRUE"
+        : "FALSE";
+  }
+}
+
+    async function saveStaffMasterEdit(
+  staffId
+) {
+
+  const lineUserIdInput =
+    document.getElementById(
+      "staffEditLineUserId"
+    );
+
+  const nameInput =
+    document.getElementById(
+      "staffEditName"
+    );
+
+  const roleInput =
+    document.getElementById(
+      "staffEditRole"
+    );
+
+  const activeInput =
+    document.getElementById(
+      "staffEditActive"
+    );
+
+  const emailInput =
+    document.getElementById(
+      "staffEditEmail"
+    );
+
+  const notificationInput =
+    document.getElementById(
+      "staffEditNotification"
+    );
+
+  const manageVenueInput =
+    document.getElementById(
+      "staffEditManageVenue"
+    );
+
+  const manageProgramInput =
+    document.getElementById(
+      "staffEditManageProgram"
+    );
+
+  const manageVenueProgramInput =
+    document.getElementById(
+      "staffEditManageVenueProgram"
+    );
+
+  const noteInput =
+    document.getElementById(
+      "staffEditNote"
+    );
+
+  const result =
+    document.getElementById(
+      "staffEditResult"
+    );
+
+
+  const lineUserId =
+    lineUserIdInput
+      ? lineUserIdInput.value.trim()
+      : "";
+
+  const name =
+    nameInput
+      ? nameInput.value.trim()
+      : "";
+
+  const role =
+    roleInput
+      ? roleInput.value
+      : "";
+
+  let active =
+    activeInput
+      ? activeInput.value
+      : "FALSE";
+
+  const email =
+    emailInput
+      ? emailInput.value.trim()
+      : "";
+
+  let reservationNotification =
+    notificationInput
+      ? notificationInput.value
+      : "FALSE";
+
+  let manageVenue =
+    manageVenueInput
+      ? manageVenueInput.value
+      : "FALSE";
+
+  let manageProgram =
+    manageProgramInput
+      ? manageProgramInput.value
+      : "FALSE";
+
+  let manageVenueProgram =
+    manageVenueProgramInput
+      ? manageVenueProgramInput.value
+      : "FALSE";
+
+  const note =
+    noteInput
+      ? noteInput.value.trim()
+      : "";
+
+
+  if (!lineUserId) {
+
+    if (result) {
+      result.textContent =
+        "LINEユーザーIDを入力してください。";
+    }
+
+    return;
+  }
+
+
+  if (!name) {
+
+    if (result) {
+      result.textContent =
+        "氏名を入力してください。";
+    }
+
+    return;
+  }
+
+
+  if (!role) {
+
+    if (result) {
+      result.textContent =
+        "権限を選択してください。";
+    }
+
+    return;
+  }
+
+
+  /*
+   * 申請・却下は
+   * 必ず無効＋権限なし
+   */
+  if (
+    role === "申請" ||
+    role === "却下"
+  ) {
+
+    active =
+      "FALSE";
+
+    reservationNotification =
+      "FALSE";
+
+    manageVenue =
+      "FALSE";
+
+    manageProgram =
+      "FALSE";
+
+    manageVenueProgram =
+      "FALSE";
+  }
+
+
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+
+    if (result) {
+      result.textContent =
+        "運営者情報を取得できませんでした。";
+    }
+
+    return;
+  }
+
+
+  if (result) {
+    result.textContent =
+      "保存中...";
+  }
+
+
+  try {
+
+    const res =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            new URLSearchParams({
+
+              action:
+                "saveStaffMaster",
+
+              adminUserId:
+                currentProfile.userId,
+
+              staffId:
+                staffId,
+
+              lineUserId:
+                lineUserId,
+
+              name:
+                name,
+
+              role:
+                role,
+
+              active:
+                active,
+
+              email:
+                email,
+
+              reservationNotification:
+                reservationNotification,
+
+              manageVenue:
+                manageVenue,
+
+              manageProgram:
+                manageProgram,
+
+              manageVenueProgram:
+                manageVenueProgram,
+
+              note:
+                note
+
+            })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      !data ||
+      !data.ok
+    ) {
+
+      if (result) {
+
+        let message =
+          data &&
+          data.message
+            ? data.message
+            : "";
+
+
+        if (
+          message ===
+          "line_user_id_already_exists"
+        ) {
+          message =
+            "このLINEユーザーIDはすでに登録されています。";
+        }
+
+
+        result.textContent =
+          "保存できませんでした。\n" +
+          message;
+      }
+
+      return;
+    }
+
+
+    await openStaffMaster();
+
+
+  } catch (err) {
+
+    if (result) {
+      result.textContent =
+        "保存中にエラーが発生しました。\n" +
+        err.message;
+    }
+
+  }
+}
+
+    function openStaffApplication() {
+
+  showPanel(
+    "staffApplication"
+  );
+
+
+  const lineNameInput =
+    document.getElementById(
+      "staffApplicationLineName"
+    );
+
+  const nameInput =
+    document.getElementById(
+      "staffApplicationName"
+    );
+
+  const result =
+    document.getElementById(
+      "staffApplicationResult"
+    );
+
+
+  if (result) {
+    result.textContent = "";
+  }
+
+
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+
+    if (result) {
+      result.textContent =
+        "LINE情報を取得できませんでした。";
+    }
+
+    return;
+  }
+
+
+  if (lineNameInput) {
+    lineNameInput.value =
+      currentProfile.displayName || "";
+  }
+
+
+  /*
+   * 氏名欄はLINE表示名を
+   * 初期値として入れる。
+   * 本人が本名へ修正可能。
+   */
+  if (
+    nameInput &&
+    !nameInput.value
+  ) {
+    nameInput.value =
+      currentProfile.displayName || "";
+  }
+}
+
+    async function submitStaffApplication() {
+
+  const nameInput =
+    document.getElementById(
+      "staffApplicationName"
+    );
+
+  const emailInput =
+    document.getElementById(
+      "staffApplicationEmail"
+    );
+
+  const result =
+    document.getElementById(
+      "staffApplicationResult"
+    );
+
+  const button =
+    document.getElementById(
+      "staffApplicationSubmitButton"
+    );
+
+
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+
+    if (result) {
+      result.textContent =
+        "LINE情報を取得できませんでした。";
+    }
+
+    return;
+  }
+
+
+  const name =
+    nameInput
+      ? nameInput.value.trim()
+      : "";
+
+  const email =
+    emailInput
+      ? emailInput.value.trim()
+      : "";
+
+
+  if (!name) {
+
+    if (result) {
+      result.textContent =
+        "氏名を入力してください。";
+    }
+
+    return;
+  }
+
+
+  if (result) {
+    result.textContent =
+      "申請中...";
+  }
+
+
+  if (button) {
+    button.disabled = true;
+  }
+
+
+  try {
+
+    const res =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            new URLSearchParams({
+
+              action:
+                "submitStaffApplication",
+
+              lineUserId:
+                currentProfile.userId,
+
+              name:
+                name,
+
+              email:
+                email
+
+            })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      !data ||
+      !data.ok
+    ) {
+
+      let message =
+        data &&
+        data.message
+          ? data.message
+          : "";
+
+
+      if (
+        message ===
+        "staff_application_already_exists"
+      ) {
+        message =
+          "すでにスタッフ登録情報があります。";
+      }
+
+
+      if (result) {
+        result.textContent =
+          "申請できませんでした。\n" +
+          message;
+      }
+
+
+      if (button) {
+        button.disabled = false;
+      }
+
+      return;
+    }
+
+
+    if (result) {
+      result.textContent =
+        "スタッフ登録を申請しました。\n承認されるまでお待ちください。";
+    }
+
+
+    if (nameInput) {
+      nameInput.disabled = true;
+    }
+
+    if (emailInput) {
+      emailInput.disabled = true;
+    }
+
+    if (button) {
+      button.style.display =
+        "none";
+    }
+
+
+  } catch (err) {
+
+    if (result) {
+      result.textContent =
+        "申請中にエラーが発生しました。\n" +
+        err.message;
+    }
+
+
+    if (button) {
+      button.disabled = false;
+    }
+
+  }
+}
+    
     async function openVenueProgramMaster() {
 
   showPanel(
