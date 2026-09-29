@@ -1006,180 +1006,51 @@
 
   <div class="service-management-section">
 
-    <div class="service-management-title">
-      スタッフを追加
-    </div>
-
-
-    <label class="form-label">
-      LINEユーザーID
-    </label>
-
-    <input
-      type="text"
-      id="staffMasterLineUserId"
-      class="service-form-control"
-    >
-
-
-    <label class="form-label">
-      氏名
-    </label>
-
-    <input
-      type="text"
-      id="staffMasterName"
-      class="service-form-control"
-    >
-
-
-    <label class="form-label">
-      権限
-    </label>
-
-    <select
-  id="staffMasterRole"
-  class="service-form-control"
->
-  <option value="">
-    権限を選択
-  </option>
-
-  <option value="申請">
-    申請
-  </option>
-
-  <option value="代表">
-    代表
-  </option>
-
-  <option value="運営">
-    運営
-  </option>
-
-  <option value="運営補助">
-    運営補助
-  </option>
-
-  <option value="調理補助">
-    調理補助
-  </option>
-
-  <option value="却下">
-    却下
-  </option>
-</select>
-
-
-    <label class="form-label">
-      メールアドレス
-    </label>
-
-    <input
-      type="email"
-      id="staffMasterEmail"
-      class="service-form-control"
-    >
-
-
-    <label class="form-label">
-      予約通知
-    </label>
-
-    <select
-      id="staffMasterNotification"
-      class="service-form-control"
-    >
-      <option value="FALSE">
-        通知しない
-      </option>
-
-      <option value="TRUE">
-        通知する
-      </option>
-    </select>
-
-
-    <label class="form-label">
-      会場マスター管理
-    </label>
-
-    <select
-      id="staffMasterManageVenue"
-      class="service-form-control"
-    >
-      <option value="FALSE">
-        不可
-      </option>
-
-      <option value="TRUE">
-        可
-      </option>
-    </select>
-
-
-    <label class="form-label">
-      プログラムマスター管理
-    </label>
-
-    <select
-      id="staffMasterManageProgram"
-      class="service-form-control"
-    >
-      <option value="FALSE">
-        不可
-      </option>
-
-      <option value="TRUE">
-        可
-      </option>
-    </select>
-
-
-    <label class="form-label">
-      会場プログラムマスター管理
-    </label>
-
-    <select
-      id="staffMasterManageVenueProgram"
-      class="service-form-control"
-    >
-      <option value="FALSE">
-        不可
-      </option>
-
-      <option value="TRUE">
-        可
-      </option>
-    </select>
-
-
-    <label class="form-label">
-      備考
-    </label>
-
-    <textarea
-      id="staffMasterNote"
-      class="service-form-control"
-      rows="3"
-    ></textarea>
-
-
-    <button
-      type="button"
-      class="service-save-button"
-      onclick="createStaffMaster()"
-    >
-      スタッフを追加
-    </button>
-
-
-    <div
-      id="staffMasterSaveResult"
-      class="service-create-result"
-    ></div>
-
+  <div class="service-management-title">
+    スタッフ登録申請
   </div>
+
+
+  <div class="small">
+    スタッフになる方に
+    このQRコードを読み取ってもらってください。
+  </div>
+
+
+  <div
+    id="staffApplicationQrArea"
+    style="
+      text-align:center;
+      margin-top:20px;
+    "
+  ></div>
+
+
+  <div
+    id="staffApplicationUrl"
+    class="small"
+    style="
+      margin-top:16px;
+      word-break:break-all;
+    "
+  ></div>
+
+
+  <button
+    type="button"
+    class="edit-reservation-button"
+    onclick="copyStaffApplicationUrl()"
+  >
+    申請URLをコピー
+  </button>
+
+
+  <div
+    id="staffApplicationCopyResult"
+    class="service-create-result"
+  ></div>
+
+</div>
 
 
   <div
@@ -4090,6 +3961,48 @@ html +=
     "staffMaster"
   );
 
+      const staffApplicationUrl =
+  "https://liff.line.me/2007730715-DyW80WjD?mode=staff-application";
+
+
+const qrArea =
+  document.getElementById(
+    "staffApplicationQrArea"
+  );
+
+const urlArea =
+  document.getElementById(
+    "staffApplicationUrl"
+  );
+
+
+if (qrArea) {
+
+  const qrUrl =
+    "https://quickchart.io/qr?size=220&text=" +
+    encodeURIComponent(
+      staffApplicationUrl
+    );
+
+  qrArea.innerHTML = `
+    <img
+      src="${qrUrl}"
+      alt="スタッフ登録申請QRコード"
+      style="
+        width:220px;
+        max-width:100%;
+        height:auto;
+      "
+    >
+  `;
+}
+
+
+if (urlArea) {
+  urlArea.textContent =
+    staffApplicationUrl;
+}
+
   const list =
     document.getElementById(
       "staffMasterList"
@@ -4338,6 +4251,40 @@ html +=
     list.textContent =
       "スタッフマスターの取得中にエラーが発生しました。\n" +
       err.message;
+
+  }
+}
+
+    async function copyStaffApplicationUrl() {
+
+  const staffApplicationUrl =
+    "https://liff.line.me/2007730715-DyW80WjD?mode=staff-application";
+
+  const result =
+    document.getElementById(
+      "staffApplicationCopyResult"
+    );
+
+
+  try {
+
+    await navigator.clipboard.writeText(
+      staffApplicationUrl
+    );
+
+
+    if (result) {
+      result.textContent =
+        "申請URLをコピーしました。";
+    }
+
+
+  } catch (err) {
+
+    if (result) {
+      result.textContent =
+        "コピーできませんでした。";
+    }
 
   }
 }
