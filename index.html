@@ -4098,6 +4098,219 @@ html +=
   }
 }
 
+    async function createVenueProgramMaster() {
+
+  const venueInput =
+    document.getElementById(
+      "venueProgramVenue"
+    );
+
+  const programInput =
+    document.getElementById(
+      "venueProgramProgram"
+    );
+
+  const startTimeInput =
+    document.getElementById(
+      "venueProgramStartTime"
+    );
+
+  const endTimeInput =
+    document.getElementById(
+      "venueProgramEndTime"
+    );
+
+  const capacityInput =
+    document.getElementById(
+      "venueProgramCapacity"
+    );
+
+  const result =
+    document.getElementById(
+      "venueProgramSaveResult"
+    );
+
+
+  const venueId =
+    venueInput
+      ? venueInput.value
+      : "";
+
+  const programId =
+    programInput
+      ? programInput.value
+      : "";
+
+  const startTime =
+    startTimeInput
+      ? startTimeInput.value
+      : "";
+
+  const endTime =
+    endTimeInput
+      ? endTimeInput.value
+      : "";
+
+  const defaultCapacity =
+    capacityInput
+      ? Number(
+          capacityInput.value || 0
+        )
+      : 0;
+
+
+  if (!venueId) {
+
+    if (result) {
+      result.textContent =
+        "会場を選択してください。";
+    }
+
+    return;
+  }
+
+
+  if (!programId) {
+
+    if (result) {
+      result.textContent =
+        "プログラムを選択してください。";
+    }
+
+    return;
+  }
+
+
+  if (
+    !currentProfile ||
+    !currentProfile.userId
+  ) {
+
+    if (result) {
+      result.textContent =
+        "運営者情報を取得できませんでした。";
+    }
+
+    return;
+  }
+
+
+  if (result) {
+    result.textContent =
+      "保存中...";
+  }
+
+
+  try {
+
+    const res =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            new URLSearchParams({
+
+              action:
+                "saveVenueProgramMaster",
+
+              adminUserId:
+                currentProfile.userId,
+
+              venueProgramId:
+                "",
+
+              venueId:
+                venueId,
+
+              programId:
+                programId,
+
+              startTime:
+                startTime,
+
+              endTime:
+                endTime,
+
+              defaultCapacity:
+                String(
+                  defaultCapacity
+                ),
+
+              active:
+                "TRUE"
+
+            })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      !data ||
+      !data.ok
+    ) {
+
+      if (result) {
+        result.textContent =
+          "保存できませんでした。\n" +
+          (
+            data &&
+            data.message
+              ? data.message
+              : ""
+          );
+      }
+
+      return;
+    }
+
+
+    if (venueInput) {
+      venueInput.value = "";
+    }
+
+    if (programInput) {
+      programInput.value = "";
+    }
+
+    if (startTimeInput) {
+      startTimeInput.value = "";
+    }
+
+    if (endTimeInput) {
+      endTimeInput.value = "";
+    }
+
+    if (capacityInput) {
+      capacityInput.value = "0";
+    }
+
+
+    if (result) {
+      result.textContent =
+        "会場プログラムを追加しました。";
+    }
+
+
+    await openVenueProgramMaster();
+
+
+  } catch (err) {
+
+    if (result) {
+      result.textContent =
+        "保存中にエラーが発生しました。\n" +
+        err.message;
+    }
+
+  }
+}
+
     async function createProgramMaster() {
 
   const nameInput =
