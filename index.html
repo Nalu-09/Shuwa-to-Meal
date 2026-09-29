@@ -4044,6 +4044,34 @@ html +=
               }
             </div>
 
+            <button
+  type="button"
+  class="edit-reservation-button"
+  onclick="openVenueProgramMasterEdit(
+    '${escapeJs(
+      item.venueProgramId || ""
+    )}',
+    '${escapeJs(
+      item.venueId || ""
+    )}',
+    '${escapeJs(
+      item.programId || ""
+    )}',
+    '${escapeJs(
+      item.startTime || ""
+    )}',
+    '${escapeJs(
+      item.endTime || ""
+    )}',
+    ${Number(
+      item.defaultCapacity || 0
+    )},
+    ${item.active === false ? "false" : "true"}
+  )"
+>
+  編集
+</button>
+
           </div>
         `;
       }
@@ -4284,6 +4312,327 @@ html +=
     }
 
   }
+}
+
+    function openVenueProgramMasterEdit(
+  venueProgramId,
+  venueId,
+  programId,
+  startTime,
+  endTime,
+  defaultCapacity,
+  active
+) {
+
+  const list =
+    document.getElementById(
+      "venueProgramMasterList"
+    );
+
+  if (!list) {
+    return;
+  }
+
+
+  /*
+   * 現在表示中の
+   * 会場・プログラム情報を再取得
+   */
+  fetch(
+    API_URL,
+    {
+      method: "POST",
+
+      body:
+        new URLSearchParams({
+
+          action:
+            "getVenueProgramMasterData",
+
+          adminUserId:
+            currentProfile.userId
+
+        })
+    }
+  )
+    .then(function(res) {
+      return res.json();
+    })
+
+    .then(function(data) {
+
+      if (
+        !data ||
+        !data.ok
+      ) {
+
+        list.className =
+          "status";
+
+        list.textContent =
+          "編集データを取得できませんでした。";
+
+        return;
+      }
+
+
+      const venues =
+        Array.isArray(
+          data.venues
+        )
+          ? data.venues
+          : [];
+
+
+      const programs =
+        Array.isArray(
+          data.programs
+        )
+          ? data.programs
+          : [];
+
+
+      let venueOptions =
+        '<option value="">会場を選択</option>';
+
+
+      venues.forEach(
+        function(venue) {
+
+          const id =
+            String(
+              venue.venueId || ""
+            );
+
+          const selected =
+            id ===
+            String(
+              venueId || ""
+            )
+              ? " selected"
+              : "";
+
+          const inactive =
+            venue.active === false
+              ? "（無効）"
+              : "";
+
+
+          venueOptions += `
+            <option
+              value="${escapeHtml(id)}"
+              ${selected}
+            >
+              ${escapeHtml(
+                venue.venueName || id
+              )}${inactive}
+            </option>
+          `;
+        }
+      );
+
+
+      let programOptions =
+        '<option value="">プログラムを選択</option>';
+
+
+      programs.forEach(
+        function(program) {
+
+          const id =
+            String(
+              program.programId || ""
+            );
+
+          const selected =
+            id ===
+            String(
+              programId || ""
+            )
+              ? " selected"
+              : "";
+
+          const inactive =
+            program.active === false
+              ? "（無効）"
+              : "";
+
+
+          programOptions += `
+            <option
+              value="${escapeHtml(id)}"
+              ${selected}
+            >
+              ${escapeHtml(
+                program.programName || id
+              )}${inactive}
+            </option>
+          `;
+        }
+      );
+
+
+      list.className =
+        "";
+
+      list.innerHTML = `
+        <div class="service-management-section">
+
+          <div class="service-management-title">
+            会場プログラムを編集
+          </div>
+
+
+          <div class="small">
+            会場プログラムID：
+            ${escapeHtml(
+              venueProgramId || ""
+            )}
+          </div>
+
+
+          <label class="form-label">
+            会場
+          </label>
+
+          <select
+            id="venueProgramEditVenue"
+            class="service-form-control"
+          >
+            ${venueOptions}
+          </select>
+
+
+          <label class="form-label">
+            プログラム
+          </label>
+
+          <select
+            id="venueProgramEditProgram"
+            class="service-form-control"
+          >
+            ${programOptions}
+          </select>
+
+
+          <label class="form-label">
+            開始時間
+          </label>
+
+          <input
+            type="time"
+            id="venueProgramEditStartTime"
+            class="service-form-control"
+            value="${escapeHtml(
+              startTime || ""
+            )}"
+          >
+
+
+          <label class="form-label">
+            終了時間
+          </label>
+
+          <input
+            type="time"
+            id="venueProgramEditEndTime"
+            class="service-form-control"
+            value="${escapeHtml(
+              endTime || ""
+            )}"
+          >
+
+
+          <label class="form-label">
+            基本定員
+          </label>
+
+          <input
+            type="number"
+            id="venueProgramEditCapacity"
+            class="service-form-control"
+            min="0"
+            value="${Number(
+              defaultCapacity || 0
+            )}"
+          >
+
+
+          <label class="form-label">
+            状態
+          </label>
+
+          <select
+            id="venueProgramEditActive"
+            class="service-form-control"
+          >
+            <option value="TRUE">
+              有効
+            </option>
+
+            <option value="FALSE">
+              無効
+            </option>
+          </select>
+
+
+          <button
+            type="button"
+            class="service-save-button"
+            onclick="saveVenueProgramMasterEdit(
+              '${escapeJs(
+                venueProgramId || ""
+              )}'
+            )"
+          >
+            変更を保存
+          </button>
+
+
+          <button
+            type="button"
+            class="edit-reservation-button"
+            onclick="openVenueProgramMaster()"
+          >
+            キャンセル
+          </button>
+
+
+          <div
+            id="venueProgramEditResult"
+            class="service-create-result"
+          ></div>
+
+        </div>
+      `;
+
+
+      const activeSelect =
+        document.getElementById(
+          "venueProgramEditActive"
+        );
+
+
+      if (activeSelect) {
+
+        activeSelect.value =
+          active === false
+            ? "FALSE"
+            : "TRUE";
+      }
+
+    })
+
+    .catch(function(err) {
+
+      list.className =
+        "status";
+
+      list.textContent =
+        "編集画面の表示中にエラーが発生しました。\n" +
+        err.message;
+
+    });
 }
 
     async function createProgramMaster() {
