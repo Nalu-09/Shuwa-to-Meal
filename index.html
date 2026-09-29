@@ -4073,6 +4073,39 @@ if (urlArea) {
         ? data.staffMembers
         : [];
 
+    staffMembers.sort(function(a, b) {
+
+  const priority = {
+    "申請": 0,
+    "代表": 1,
+    "運営": 2,
+    "運営補助": 3,
+    "調理補助": 4,
+    "却下": 5
+  };
+
+  const aPriority =
+    Object.prototype.hasOwnProperty.call(
+      priority,
+      a.role
+    )
+      ? priority[a.role]
+      : 99;
+
+  const bPriority =
+    Object.prototype.hasOwnProperty.call(
+      priority,
+      b.role
+    )
+      ? priority[b.role]
+      : 99;
+
+  return (
+    aPriority -
+    bPriority
+  );
+});
+
 
     if (
       staffMembers.length === 0
