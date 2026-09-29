@@ -3506,31 +3506,6 @@ venues.forEach(
         </div>
 
         <button
-  type="button"
-  class="edit-reservation-button"
-  onclick="openProgramMasterEdit(
-    '${escapeJs(
-      program.programId || ""
-    )}',
-    '${escapeJs(
-      program.programName || ""
-    )}',
-    ${Number(
-      program.defaultPrice || 0
-    )},
-    '${escapeJs(
-      program.description || ""
-    )}',
-    ${Number(
-      program.displayOrder || 0
-    )},
-    ${program.active === false ? "false" : "true"}
-  )"
->
-  編集
-</button>
-
-        <button
           type="button"
           class="edit-reservation-button"
           onclick="openVenueMasterEdit(
