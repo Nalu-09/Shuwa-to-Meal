@@ -812,6 +812,15 @@
       会場プログラムマスター
     </button>
 
+    <button
+  id="staffMasterButton"
+  type="button"
+  onclick="openStaffMaster()"
+  style="display:none;"
+>
+  スタッフマスター
+</button>
+
   </div>
 </div>
       
@@ -977,7 +986,203 @@
   >
     読み込み前です。
   </div>
+      
 </div>
+
+    <div
+  id="staffMaster"
+  class="panel"
+>
+  <h2>Staff</h2>
+
+  <button
+    type="button"
+    class="back-button"
+    onclick="openSettingsManagement()"
+  >
+    管理設定に戻る
+  </button>
+
+
+  <div class="service-management-section">
+
+    <div class="service-management-title">
+      スタッフを追加
+    </div>
+
+
+    <label class="form-label">
+      LINEユーザーID
+    </label>
+
+    <input
+      type="text"
+      id="staffMasterLineUserId"
+      class="service-form-control"
+    >
+
+
+    <label class="form-label">
+      氏名
+    </label>
+
+    <input
+      type="text"
+      id="staffMasterName"
+      class="service-form-control"
+    >
+
+
+    <label class="form-label">
+      権限
+    </label>
+
+    <select
+      id="staffMasterRole"
+      class="service-form-control"
+    >
+      <option value="">
+        権限を選択
+      </option>
+
+      <option value="代表">
+        代表
+      </option>
+
+      <option value="運営">
+        運営
+      </option>
+
+      <option value="運営補助">
+        運営補助
+      </option>
+
+      <option value="調理補助">
+        調理補助
+      </option>
+    </select>
+
+
+    <label class="form-label">
+      メールアドレス
+    </label>
+
+    <input
+      type="email"
+      id="staffMasterEmail"
+      class="service-form-control"
+    >
+
+
+    <label class="form-label">
+      予約通知
+    </label>
+
+    <select
+      id="staffMasterNotification"
+      class="service-form-control"
+    >
+      <option value="FALSE">
+        通知しない
+      </option>
+
+      <option value="TRUE">
+        通知する
+      </option>
+    </select>
+
+
+    <label class="form-label">
+      会場マスター管理
+    </label>
+
+    <select
+      id="staffMasterManageVenue"
+      class="service-form-control"
+    >
+      <option value="FALSE">
+        不可
+      </option>
+
+      <option value="TRUE">
+        可
+      </option>
+    </select>
+
+
+    <label class="form-label">
+      プログラムマスター管理
+    </label>
+
+    <select
+      id="staffMasterManageProgram"
+      class="service-form-control"
+    >
+      <option value="FALSE">
+        不可
+      </option>
+
+      <option value="TRUE">
+        可
+      </option>
+    </select>
+
+
+    <label class="form-label">
+      会場プログラムマスター管理
+    </label>
+
+    <select
+      id="staffMasterManageVenueProgram"
+      class="service-form-control"
+    >
+      <option value="FALSE">
+        不可
+      </option>
+
+      <option value="TRUE">
+        可
+      </option>
+    </select>
+
+
+    <label class="form-label">
+      備考
+    </label>
+
+    <textarea
+      id="staffMasterNote"
+      class="service-form-control"
+      rows="3"
+    ></textarea>
+
+
+    <button
+      type="button"
+      class="service-save-button"
+      onclick="createStaffMaster()"
+    >
+      スタッフを追加
+    </button>
+
+
+    <div
+      id="staffMasterSaveResult"
+      class="service-create-result"
+    ></div>
+
+  </div>
+
+
+  <div
+    id="staffMasterList"
+    class="status"
+  >
+    読み込み前です。
+  </div>
+
+</div>
+
     
     <div
   id="serviceManagement"
@@ -3349,6 +3554,11 @@ function showReceiptQr(
       "venueProgramMasterButton"
     );
 
+      const staffMasterButton =
+  document.getElementById(
+    "staffMasterButton"
+  );
+
 
   if (venueMasterButton) {
     venueMasterButton.style.display =
@@ -3372,6 +3582,20 @@ function showReceiptQr(
         ? ""
         : "none";
   }
+
+      if (staffMasterButton) {
+
+  const role =
+    reservationPreloadData &&
+    reservationPreloadData.staff
+      ? reservationPreloadData.staff.role
+      : "";
+
+  staffMasterButton.style.display =
+    role === "代表"
+      ? ""
+      : "none";
+}
 }
 
     async function openVenueMaster() {
@@ -3749,6 +3973,232 @@ html +=
 
     list.textContent =
       "プログラムマスターの取得中にエラーが発生しました。\n" +
+      err.message;
+
+  }
+}
+
+    async function openStaffMaster() {
+
+  showPanel(
+    "staffMaster"
+  );
+
+  const list =
+    document.getElementById(
+      "staffMasterList"
+    );
+
+  if (!list) {
+    return;
+  }
+
+  list.className =
+    "status";
+
+  list.textContent =
+    "スタッフマスターを読み込み中...";
+
+
+  try {
+
+    const res =
+      await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          body:
+            new URLSearchParams({
+
+              action:
+                "getStaffMasterData",
+
+              adminUserId:
+                currentProfile.userId
+
+            })
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      !data ||
+      !data.ok
+    ) {
+
+      list.className =
+        "status";
+
+      list.textContent =
+        "スタッフマスターを取得できませんでした。\n" +
+        (
+          data &&
+          data.message
+            ? data.message
+            : ""
+        );
+
+      return;
+    }
+
+
+    const staffMembers =
+      Array.isArray(
+        data.staffMembers
+      )
+        ? data.staffMembers
+        : [];
+
+
+    if (
+      staffMembers.length === 0
+    ) {
+
+      list.className =
+        "status";
+
+      list.textContent =
+        "登録されているスタッフがいません。";
+
+      return;
+    }
+
+
+    let html =
+      `<div class="summary-list">`;
+
+
+    staffMembers.forEach(
+      function(staff) {
+
+        html += `
+          <div class="summary-card">
+
+            <div class="service-name">
+              ${escapeHtml(
+                staff.name || ""
+              )}
+            </div>
+
+
+            <div class="small">
+              スタッフID：
+              ${escapeHtml(
+                staff.staffId || ""
+              )}
+            </div>
+
+
+            <div class="small">
+              LINEユーザーID：
+              ${escapeHtml(
+                staff.lineUserId || ""
+              )}
+            </div>
+
+
+            <div class="small">
+              権限：
+              ${escapeHtml(
+                staff.role || ""
+              )}
+            </div>
+
+
+            <div class="small">
+              メールアドレス：
+              ${escapeHtml(
+                staff.email || ""
+              )}
+            </div>
+
+
+            <div class="small">
+              予約通知：
+              ${
+                staff.reservationNotification
+                  ? "通知する"
+                  : "通知しない"
+              }
+            </div>
+
+
+            <div class="small">
+              会場マスター：
+              ${
+                staff.manageVenue
+                  ? "可"
+                  : "不可"
+              }
+            </div>
+
+
+            <div class="small">
+              プログラムマスター：
+              ${
+                staff.manageProgram
+                  ? "可"
+                  : "不可"
+              }
+            </div>
+
+
+            <div class="small">
+              会場プログラムマスター：
+              ${
+                staff.manageVenueProgram
+                  ? "可"
+                  : "不可"
+              }
+            </div>
+
+
+            <div class="small">
+              状態：
+              ${
+                staff.active === false
+                  ? "無効"
+                  : "有効"
+              }
+            </div>
+
+
+            <div class="small">
+              備考：
+              ${escapeHtml(
+                staff.note || ""
+              )}
+            </div>
+
+          </div>
+        `;
+      }
+    );
+
+
+    html +=
+      `</div>`;
+
+
+    list.className =
+      "";
+
+    list.innerHTML =
+      html;
+
+
+  } catch (err) {
+
+    list.className =
+      "status";
+
+    list.textContent =
+      "スタッフマスターの取得中にエラーが発生しました。\n" +
       err.message;
 
   }
